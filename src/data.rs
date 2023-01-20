@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::collections::HashSet;
 use std::ffi::OsStr;
 use std::fs::DirEntry;
 use std::path::PathBuf;
@@ -72,15 +73,13 @@ impl CourseData {
     ) -> Result<Self> {
         let path = dir_entry.path();
         let mut data = Self::load(path.clone(), dir_entry)?;
-
-        data.check()?;
-        data.clean();
-
         images_path.push(data.key.clone());
-        data.format(images_path).await?;
 
+        data.clean();
+        data.format(images_path).await?;
         data.sort();
         data.deduplicate();
+        data.check()?;
 
         data.set_data();
 
@@ -311,6 +310,14 @@ impl QuestionData {
     }
 
     fn check(&self) -> Result<()> {
+        self.check_question_option_count()?;
+        self.check_duplicates_in_question_options()?;
+        self.check_correct_count()?;
+
+        Ok(())
+    }
+
+    fn check_question_option_count(&self) -> Result<()> {
         if self.question_options.len() < 2 || self.question_options.len() > 5 {
             bail!(
                 "Question {} has {} option(s)",
@@ -319,6 +326,29 @@ impl QuestionData {
             );
         }
 
+        Ok(())
+    }
+
+    fn check_duplicates_in_question_options(&self) -> Result<()> {
+        let texts_iter = self
+            .question_options
+            .iter()
+            .map(|question_option| question_option.text.as_str());
+
+        let mut texts_set = HashSet::<&str>::with_capacity(self.question_options.len());
+
+        for text in texts_iter {
+            if texts_set.contains(text) {
+                bail!("Duplicate question option. Text: \"{text}\"");
+            } else {
+                texts_set.insert(text);
+            }
+        }
+
+        Ok(())
+    }
+
+    fn check_correct_count(&self) -> Result<()> {
         let correct_count = self
             .question_options
             .iter()
