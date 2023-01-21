@@ -501,8 +501,10 @@ impl QuestionOptionData {
     }
 
     fn ensure_text_ends_with_period(&mut self) {
-        if !self.text.ends_with('.') {
-            self.text.push('.');
+        const PERIOD: char = '.';
+
+        if !self.text.ends_with(PERIOD) {
+            self.text.push(PERIOD);
         }
     }
 
