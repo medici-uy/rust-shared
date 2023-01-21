@@ -497,6 +497,13 @@ impl QuestionOptionData {
 
     fn format(&mut self) {
         self.text = format_text(&self.text);
+        self.ensure_text_ends_with_period();
+    }
+
+    fn ensure_text_ends_with_period(&mut self) {
+        if !self.text.ends_with('.') {
+            self.text.push('.');
+        }
     }
 
     pub fn set_data(&mut self, question_id: Uuid) {
