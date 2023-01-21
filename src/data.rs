@@ -26,7 +26,7 @@ pub struct CourseData {
 
     pub name: String,
     pub short_name: String,
-    pub aliases: Vec<String>,
+    pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
     pub year: Option<i16>,
     pub order: Option<i16>,
@@ -57,7 +57,7 @@ impl CourseData {
             key,
             name: raw.name,
             short_name: raw.short_name,
-            aliases: raw.aliases,
+            tags: raw.tags,
             image_file_name: raw.image,
             year: raw.year,
             order: raw.order,
@@ -202,7 +202,7 @@ impl Hashable for CourseData {
         bytes.extend(self.key.as_bytes());
         bytes.extend(self.name.as_bytes());
         bytes.extend(self.short_name.as_bytes());
-        bytes.extend(self.aliases.join(",").as_bytes());
+        bytes.extend(self.tags.join(",").as_bytes());
 
         if let Some(image_file_name) = &self.image_file_name {
             bytes.extend(image_file_name.to_string_lossy().as_bytes());

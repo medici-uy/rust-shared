@@ -12,7 +12,7 @@ use crate::{CourseData, CourseEvaluationData, QuestionData, QuestionOptionData};
 pub struct RawCourseData {
     pub name: String,
     pub short_name: String,
-    pub aliases: Vec<String>,
+    pub tags: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub image: Option<PathBuf>,
     pub year: Option<i16>,
@@ -36,7 +36,7 @@ impl From<CourseData> for RawCourseData {
         Self {
             name: data.name,
             short_name: data.short_name,
-            aliases: data.aliases,
+            tags: data.tags,
             image: data.image_file_name,
             year: data.year,
             order: data.order,
