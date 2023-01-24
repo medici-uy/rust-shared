@@ -7,7 +7,8 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{format_text, traits::Hashable};
+use super::helpers::{format_text, full_image_path};
+use super::traits::Hashable;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CourseData {
@@ -108,6 +109,10 @@ impl CourseData {
         for question in &mut self.questions {
             question.format();
         }
+    }
+
+    pub fn full_image_path(&self) -> Option<String> {
+        Some(full_image_path(&self.key, self.image_file_name.as_ref()?))
     }
 }
 
@@ -297,6 +302,13 @@ impl QuestionData {
 
     pub fn full_evaluation_key(&self) -> String {
         CourseEvaluationData::do_full_key(&self.course_key, &self.evaluation)
+    }
+
+    pub fn full_image_path(&self) -> Option<String> {
+        Some(full_image_path(
+            &self.course_key,
+            self.image_file_name.as_ref()?,
+        ))
     }
 }
 

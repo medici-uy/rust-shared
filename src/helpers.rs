@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -14,4 +16,18 @@ pub fn format_text(text: &str) -> String {
         .to_string();
 
     formatted
+}
+
+pub fn full_image_path<P>(course_key: &str, image_file_name: P) -> String
+where
+    P: AsRef<Path>,
+{
+    format!(
+        "{course_key}/{}",
+        image_file_name
+            .as_ref()
+            .as_os_str()
+            .to_str()
+            .expect("invalid image file name")
+    )
 }
