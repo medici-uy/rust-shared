@@ -31,3 +31,13 @@ where
             .expect("invalid image file name")
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_text() {
+        assert_eq!(format_text(" test  text . "), "test text.");
+    }
+}
