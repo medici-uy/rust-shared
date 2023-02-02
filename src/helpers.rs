@@ -10,10 +10,8 @@ static WHITESPACE_BEFORE_END_REGEX: Lazy<Regex> =
 pub fn format_text(text: &str) -> String {
     let mut formatted = text.trim().to_owned();
 
-    formatted = WHITESPACE_REGEX.replace_all(&formatted, " ").to_string();
-    formatted = WHITESPACE_BEFORE_END_REGEX
-        .replace(&formatted, "$1")
-        .to_string();
+    formatted = WHITESPACE_REGEX.replace_all(&formatted, " ").into();
+    formatted = WHITESPACE_BEFORE_END_REGEX.replace(&formatted, "$1").into();
 
     formatted
 }
