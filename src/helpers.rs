@@ -6,12 +6,14 @@ use regex::Regex;
 static WHITESPACE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s\s+").unwrap());
 static WHITESPACE_BEFORE_END_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"\s(\.|:|\?)$").unwrap());
+static DOUBLE_QUOTE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"[“”]").unwrap());
 
 pub fn format_text(text: &str) -> String {
     let mut formatted = text.trim().to_owned();
 
     formatted = WHITESPACE_REGEX.replace_all(&formatted, " ").into();
     formatted = WHITESPACE_BEFORE_END_REGEX.replace(&formatted, "$1").into();
+    formatted = DOUBLE_QUOTE_REGEX.replace_all(&formatted, "\"").into();
 
     formatted
 }
@@ -36,6 +38,6 @@ mod tests {
 
     #[test]
     fn test_format_text() {
-        assert_eq!(format_text(" test  text . "), "test text.");
+        assert_eq!(format_text(" test  “text” . "), "test \"text\".");
     }
 }
