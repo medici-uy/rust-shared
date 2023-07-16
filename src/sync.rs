@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -19,7 +19,7 @@ pub struct SyncData {
     pub course_evaluations_to_sync: Vec<CourseEvaluationData>,
     pub course_evaluations_to_delete: Vec<String>,
 
-    pub avatars_file_names: Vec<String>,
+    pub avatar_file_names: HashSet<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
