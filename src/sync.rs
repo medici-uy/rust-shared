@@ -18,6 +18,8 @@ pub struct SyncData {
 
     pub course_evaluations_to_sync: Vec<CourseEvaluationData>,
     pub course_evaluations_to_delete: Vec<String>,
+
+    pub avatars_file_names: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
