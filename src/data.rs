@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use anyhow::{bail, Result};
 use chrono::NaiveDate;
+use rust_decimal::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -16,6 +17,7 @@ pub struct CourseData {
 
     pub name: String,
     pub short_name: String,
+    pub price_in_uyu: Option<Decimal>,
     pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
     pub year: Option<i16>,
@@ -33,6 +35,7 @@ impl CourseData {
         key: String,
         name: String,
         short_name: String,
+        price_in_uyu: Option<Decimal>,
         tags: Vec<String>,
         image_file_name: Option<PathBuf>,
         year: Option<i16>,
@@ -44,6 +47,7 @@ impl CourseData {
             key,
             name,
             short_name,
+            price_in_uyu,
             tags,
             image_file_name,
             year,
@@ -123,6 +127,11 @@ impl Hashable for CourseData {
         bytes.extend(self.key.as_bytes());
         bytes.extend(self.name.as_bytes());
         bytes.extend(self.short_name.as_bytes());
+
+        if let Some(price_in_uyu) = &self.price_in_uyu {
+            bytes.extend(price_in_uyu.to_string().as_bytes());
+        }
+
         bytes.extend(self.tags.join(",").as_bytes());
 
         if let Some(image_file_name) = &self.image_file_name {
@@ -173,6 +182,7 @@ pub struct QuestionData {
     pub source: String,
     pub asked_at: Option<NaiveDate>,
     pub text: String,
+    pub topic: Option<String>,
     pub image_file_name: Option<PathBuf>,
     #[serde(skip)]
     pub question_options: Vec<QuestionOptionData>,
@@ -185,6 +195,7 @@ impl QuestionData {
         id: Uuid,
         course_key: String,
         text: String,
+        topic: Option<String>,
         image_file_name: Option<PathBuf>,
         question_options: Vec<QuestionOptionData>,
         evaluation: String,
@@ -198,6 +209,7 @@ impl QuestionData {
             source,
             asked_at,
             text,
+            topic,
             image_file_name,
             question_options,
             hash: Default::default(),
@@ -295,6 +307,8 @@ impl QuestionData {
     fn format(&mut self) {
         self.text = format_text(&self.text);
 
+        self.topic = self.topic.as_ref().map(|topic| topic.trim().to_string());
+
         for question_option in self.question_options.iter_mut() {
             question_option.format();
         }
@@ -320,6 +334,10 @@ impl Hashable for QuestionData {
 
         bytes.extend(self.course_key.as_bytes());
         bytes.extend(self.text.as_bytes());
+
+        if let Some(topic) = &self.topic {
+            bytes.extend(topic.as_bytes());
+        }
 
         if let Some(image_file_name) = &self.image_file_name {
             bytes.extend(image_file_name.to_string_lossy().as_bytes());
