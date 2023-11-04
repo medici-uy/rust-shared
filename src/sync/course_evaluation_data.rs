@@ -1,7 +1,9 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use super::traits::Hashable;
 
+#[non_exhaustive]
 #[derive(Serialize, Deserialize, PartialEq, Hash, Eq, Clone, Debug)]
 pub struct CourseEvaluationData {
     pub key: String,
@@ -14,14 +16,18 @@ pub struct CourseEvaluationData {
 }
 
 impl CourseEvaluationData {
-    pub fn new(key: String, course_key: String, name: String, order: i16) -> Self {
-        Self {
+    pub fn new(key: String, course_key: String, name: String, order: i16) -> Result<Self> {
+        let mut data = Self {
             key,
             course_key,
             name,
             order,
             hash: Default::default(),
-        }
+        };
+
+        data.hash = data.hash();
+
+        Ok(data)
     }
 
     pub fn full_key(&self) -> String {
@@ -42,10 +48,6 @@ impl Hashable for CourseEvaluationData {
         bytes.extend(self.order.to_be_bytes());
 
         bytes
-    }
-
-    fn set_hash(&mut self) {
-        self.hash = self.hash_data();
     }
 }
 

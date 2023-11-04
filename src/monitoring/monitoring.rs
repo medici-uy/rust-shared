@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Default, Clone, Debug)]
 pub struct Monitoring {
     pub commit: Option<String>,
     pub db: MonitoringDb,
@@ -13,17 +13,7 @@ impl Monitoring {
     }
 }
 
-impl Default for Monitoring {
-    fn default() -> Self {
-        Self {
-            commit: None,
-            db: MonitoringDb::default(),
-            cache: MonitoringCache::default(),
-        }
-    }
-}
-
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Default, Clone, Debug)]
 pub struct MonitoringDb {
     pub ok: bool,
     pub error: Option<String>,
@@ -33,34 +23,11 @@ pub struct MonitoringDb {
     pub min_connections: usize,
 }
 
-impl Default for MonitoringDb {
-    fn default() -> Self {
-        Self {
-            ok: false,
-            error: None,
-            active_connections: 0,
-            idle_connections: 0,
-            max_connections: 0,
-            min_connections: 0,
-        }
-    }
-}
-
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Default, Clone, Debug)]
 pub struct MonitoringCache {
     pub ok: bool,
     pub error: Option<String>,
     pub pool_size: usize,
-}
-
-impl Default for MonitoringCache {
-    fn default() -> Self {
-        Self {
-            ok: false,
-            error: None,
-            pool_size: 0,
-        }
-    }
 }
 
 #[cfg(test)]

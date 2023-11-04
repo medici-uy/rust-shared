@@ -12,6 +12,7 @@ use super::helpers::{format_text, full_image_path};
 use super::question_option_data::QuestionOptionData;
 use super::traits::Hashable;
 
+#[non_exhaustive]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct QuestionData {
     pub id: Uuid,
@@ -21,7 +22,9 @@ pub struct QuestionData {
     pub source: String,
     pub asked_at: Option<NaiveDate>,
     pub text: String,
+    pub explanation: Option<String>,
     pub topic: Option<String>,
+    pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
     #[serde(skip)]
     pub question_options: Vec<QuestionOptionData>,
@@ -34,28 +37,46 @@ impl QuestionData {
         id: Uuid,
         course_key: String,
         text: String,
+        explanation: Option<String>,
         topic: Option<String>,
+        tags: Vec<String>,
         image_file_name: Option<PathBuf>,
         question_options: Vec<QuestionOptionData>,
         evaluation: String,
         source: String,
         asked_at: Option<NaiveDate>,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        let mut data = Self {
             id,
             course_key,
             evaluation,
             source,
             asked_at,
             text,
+            explanation,
             topic,
+            tags,
             image_file_name,
             question_options,
             hash: Default::default(),
-        }
+        };
+
+        data.remove_blank_options();
+        data.format();
+        data.sort();
+        data.deduplicate();
+        data.check()?;
+
+        data.hash = data.hash();
+
+        Ok(data)
     }
 
-    pub fn sort_options(&mut self) {
+    pub fn is_blank(&self) -> bool {
+        self.text.is_empty() && self.question_options.is_empty()
+    }
+
+    fn sort(&mut self) {
         self.question_options.sort_by(|a, b| {
             if a.correct {
                 Ordering::Less
@@ -67,17 +88,13 @@ impl QuestionData {
         })
     }
 
-    pub fn clean(&mut self) {
-        self.remove_empty_options();
-    }
-
-    pub fn deduplicate_options(&mut self) {
+    fn deduplicate(&mut self) {
         self.question_options.dedup_by(|a, b| a.eq_data(b));
     }
 
-    fn remove_empty_options(&mut self) {
+    fn remove_blank_options(&mut self) {
         self.question_options
-            .retain(|question_option| !question_option.text.is_empty());
+            .retain(|question_option| !question_option.is_blank());
     }
 
     pub fn eq_data(&self, other: &Self) -> bool {
@@ -90,7 +107,7 @@ impl QuestionData {
                 .all(|a| other.question_options.iter().any(|b| a.eq_data(b)))
     }
 
-    pub fn check(&self) -> Result<()> {
+    fn check(&self) -> Result<()> {
         self.check_question_option_count()?;
         self.check_duplicates_in_question_options()?;
         self.check_correct_count()?;
@@ -99,9 +116,10 @@ impl QuestionData {
     }
 
     fn check_question_option_count(&self) -> Result<()> {
-        if self.question_options.len() < 2 || self.question_options.len() > 5 {
+        if !self.is_blank() && (self.question_options.len() < 2 || self.question_options.len() > 5)
+        {
             bail!(
-                "Question {} has {} option(s)",
+                "question with ID {} has {} option(s)",
                 self.id,
                 self.question_options.len()
             );
@@ -120,7 +138,7 @@ impl QuestionData {
 
         for text in texts_iter {
             if texts_set.contains(text) {
-                bail!("Duplicate question option. Text: \"{text}\"");
+                bail!("duplicate question option. Text: \"{text}\"");
             } else {
                 texts_set.insert(text);
             }
@@ -136,21 +154,37 @@ impl QuestionData {
             .filter(|option| option.correct)
             .count();
 
-        if correct_count != 1 {
-            bail!("Question {} has {correct_count} correct options", self.id)
+        if !self.is_blank() && correct_count != 1 {
+            bail!(
+                "question with ID {} has {correct_count} correct options",
+                self.id
+            )
         }
 
         Ok(())
     }
 
-    pub fn format(&mut self) {
+    fn format(&mut self) {
         self.text = format_text(&self.text);
+
+        self.explanation = self.explanation.as_mut().and_then(|original_explanation| {
+            let explanation = original_explanation.trim().to_string();
+
+            if explanation.is_empty() {
+                None
+            } else {
+                Some(explanation)
+            }
+        });
 
         self.topic = self.topic.as_ref().map(|topic| topic.trim().to_string());
 
-        for question_option in self.question_options.iter_mut() {
-            question_option.format();
-        }
+        self.tags = self
+            .tags
+            .iter()
+            .map(|tag| tag.trim().to_string())
+            .filter(|tag| !tag.is_empty())
+            .collect();
     }
 
     pub fn full_evaluation_key(&self) -> String {
@@ -174,12 +208,20 @@ impl Hashable for QuestionData {
         bytes.extend(self.course_key.as_bytes());
         bytes.extend(self.text.as_bytes());
 
-        if let Some(topic) = &self.topic {
-            bytes.extend(topic.as_bytes());
+        if let Some(explanation) = &self.explanation {
+            bytes.extend(format!("explanation {explanation}").as_bytes());
         }
 
+        if let Some(topic) = &self.topic {
+            bytes.extend(format!("topic {topic}").as_bytes());
+        }
+
+        bytes.extend(self.tags.iter().flat_map(|tag| tag.as_bytes()));
+
         if let Some(image_file_name) = &self.image_file_name {
-            bytes.extend(image_file_name.to_string_lossy().as_bytes());
+            bytes.extend(
+                format!("image_file_name {}", image_file_name.to_string_lossy()).as_bytes(),
+            );
         }
 
         bytes.extend(
@@ -192,18 +234,10 @@ impl Hashable for QuestionData {
         bytes.extend(self.source.as_bytes());
 
         if let Some(asked_at) = self.asked_at {
-            bytes.extend(asked_at.to_string().as_bytes());
+            bytes.extend(format!("asked_at {}", asked_at).as_bytes());
         }
 
         bytes
-    }
-
-    fn set_hash(&mut self) {
-        for question_option in &mut self.question_options {
-            question_option.set_hash();
-        }
-
-        self.hash = self.hash_data();
     }
 }
 
@@ -213,11 +247,13 @@ mod tests {
 
     #[test]
     fn test_check() {
-        let data = QuestionData::new(
+        let result = QuestionData::new(
             Uuid::new_v4(),
             "course".into(),
             "text".into(),
             None,
+            None,
+            vec![],
             None,
             vec![],
             "eva".into(),
@@ -225,6 +261,6 @@ mod tests {
             None,
         );
 
-        assert!(data.check().is_err());
+        assert!(result.is_err());
     }
 }

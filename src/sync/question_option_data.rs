@@ -1,9 +1,11 @@
+use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::helpers::format_text;
 use super::traits::Hashable;
 
+#[non_exhaustive]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct QuestionOptionData {
     pub id: Uuid,
@@ -11,36 +13,47 @@ pub struct QuestionOptionData {
     pub question_id: Uuid,
     pub text: String,
     pub correct: bool,
-    pub explanation: Option<String>,
 
     pub hash: String,
 }
 
 impl QuestionOptionData {
-    pub fn new(
-        id: Uuid,
-        question_id: Uuid,
-        text: String,
-        correct: bool,
-        explanation: Option<String>,
-    ) -> Self {
-        Self {
+    pub fn new(id: Uuid, question_id: Uuid, text: String, correct: bool) -> Result<Self> {
+        let mut data = Self {
             id,
             question_id,
             text,
             correct,
-            explanation,
             hash: Default::default(),
-        }
+        };
+
+        data.format();
+        data.check()?;
+
+        data.hash = data.hash();
+
+        Ok(data)
+    }
+
+    pub fn is_blank(&self) -> bool {
+        self.text.is_empty()
     }
 
     pub fn eq_data(&self, other: &Self) -> bool {
-        self.text == other.text
+        self.question_id == other.question_id
+            && self.text == other.text
             && self.correct == other.correct
-            && self.explanation == other.explanation
     }
 
-    pub fn format(&mut self) {
+    fn check(&self) -> Result<()> {
+        if self.id == self.question_id {
+            bail!("invalid question option with ID {}", self.id);
+        }
+
+        Ok(())
+    }
+
+    fn format(&mut self) {
         self.text = format_text(&self.text);
         self.ensure_text_ends_with_period();
     }
@@ -61,17 +74,9 @@ impl Hashable for QuestionOptionData {
         bytes.extend(self.id.as_bytes());
         bytes.extend(self.question_id.as_bytes());
         bytes.extend(self.text.as_bytes());
-        bytes.extend(&[self.correct as u8]);
-
-        if let Some(explanation) = &self.explanation {
-            bytes.extend(explanation.as_bytes());
-        }
+        bytes.push(self.correct as u8);
 
         bytes
-    }
-
-    fn set_hash(&mut self) {
-        self.hash = self.hash_data();
     }
 }
 
@@ -81,10 +86,9 @@ mod tests {
 
     #[test]
     fn test_format() {
-        let text = "  option  1 ".to_string();
-        let mut data = QuestionOptionData::new(Uuid::new_v4(), Uuid::new_v4(), text, true, None);
-
-        data.format();
+        let data =
+            QuestionOptionData::new(Uuid::new_v4(), Uuid::new_v4(), "  option  1 ".into(), true)
+                .unwrap();
 
         assert_eq!(data.text, "option 1.");
     }
@@ -94,18 +98,10 @@ mod tests {
         let id = Uuid::new_v4();
         let question_id = Uuid::new_v4();
 
-        let mut data_before =
-            QuestionOptionData::new(id, question_id, "opt old".into(), false, None);
+        let data_1 = QuestionOptionData::new(id, question_id, "opt 1".into(), false).unwrap();
 
-        data_before.format();
-        data_before.set_hash();
+        let data_2 = QuestionOptionData::new(id, question_id, "opt 2".into(), false).unwrap();
 
-        let mut data_after = data_before.clone();
-        data_after.text = "opt new".into();
-
-        data_after.format();
-        data_after.set_hash();
-
-        assert_ne!(data_before.hash, data_after.hash);
+        assert_ne!(data_1.hash, data_2.hash);
     }
 }

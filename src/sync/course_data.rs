@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::path::PathBuf;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use rust_decimal::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -10,6 +10,7 @@ use super::helpers::full_image_path;
 use super::question_data::QuestionData;
 use super::traits::Hashable;
 
+#[non_exhaustive]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CourseData {
     pub key: String,
@@ -19,8 +20,8 @@ pub struct CourseData {
     pub price_in_uyu: Option<Decimal>,
     pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
-    pub year: Option<i16>,
-    pub order: Option<i16>,
+    pub year: Option<u16>,
+    pub order: Option<u16>,
     #[serde(skip)]
     pub questions: Vec<QuestionData>,
     #[serde(skip)]
@@ -37,12 +38,12 @@ impl CourseData {
         price_in_uyu: Option<Decimal>,
         tags: Vec<String>,
         image_file_name: Option<PathBuf>,
-        year: Option<i16>,
-        order: Option<i16>,
+        year: Option<u16>,
+        order: Option<u16>,
         questions: Vec<QuestionData>,
         evaluations: Vec<CourseEvaluationData>,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        let mut data = Self {
             key,
             name,
             short_name,
@@ -54,16 +55,21 @@ impl CourseData {
             questions,
             evaluations,
             hash: Default::default(),
-        }
+        };
+
+        data.process()?;
+
+        data.hash = data.hash();
+
+        Ok(data)
     }
 
     pub fn process(&mut self) -> Result<()> {
-        self.clean();
+        self.remove_blank_questions();
         self.format();
         self.sort();
         self.deduplicate();
         self.check()?;
-        self.set_hash();
 
         Ok(())
     }
@@ -80,38 +86,29 @@ impl CourseData {
                 },
                 ordering => ordering,
             });
-
-        for question in &mut self.questions {
-            question.sort_options();
-        }
     }
 
-    fn clean(&mut self) {
-        for question in &mut self.questions {
-            question.clean();
-        }
+    fn remove_blank_questions(&mut self) {
+        self.questions.retain(|question| !question.is_blank());
     }
 
     fn deduplicate(&mut self) {
         self.questions.dedup_by(|a, b| a.eq_data(b));
-
-        for question in &mut self.questions {
-            question.deduplicate_options();
-        }
     }
 
     fn check(&self) -> Result<()> {
-        for question in &self.questions {
-            question.check()?;
+        if self.key.is_empty() || self.name.is_empty() || self.short_name.is_empty() {
+            bail!("invalid course with key {}", self.key);
         }
 
         Ok(())
     }
 
     fn format(&mut self) {
-        for question in &mut self.questions {
-            question.format();
-        }
+        self.key = self.key.trim().into();
+        self.name = self.name.trim().into();
+        self.short_name = self.short_name.trim().into();
+        self.tags = self.tags.iter().map(|tag| tag.trim().into()).collect();
     }
 
     pub fn full_image_path(&self) -> Option<String> {
@@ -128,21 +125,23 @@ impl Hashable for CourseData {
         bytes.extend(self.short_name.as_bytes());
 
         if let Some(price_in_uyu) = &self.price_in_uyu {
-            bytes.extend(price_in_uyu.to_string().as_bytes());
+            bytes.extend(format!("price_in_uyu {}", price_in_uyu).as_bytes());
         }
 
         bytes.extend(self.tags.join(",").as_bytes());
 
         if let Some(image_file_name) = &self.image_file_name {
-            bytes.extend(image_file_name.to_string_lossy().as_bytes());
+            bytes.extend(
+                format!("image_file_name {}", image_file_name.to_string_lossy()).as_bytes(),
+            );
         }
 
         if let Some(year) = self.year {
-            bytes.extend(&year.to_be_bytes());
+            bytes.extend(format!("year {year}").as_bytes());
         }
 
         if let Some(order) = self.order {
-            bytes.extend(&order.to_be_bytes());
+            bytes.extend(format!("order {order}").as_bytes());
         }
 
         bytes.extend(
@@ -157,17 +156,5 @@ impl Hashable for CourseData {
         );
 
         bytes
-    }
-
-    fn set_hash(&mut self) {
-        for question in &mut self.questions {
-            question.set_hash();
-        }
-
-        for evaluation in &mut self.evaluations {
-            evaluation.set_hash();
-        }
-
-        self.hash = self.hash_data();
     }
 }
