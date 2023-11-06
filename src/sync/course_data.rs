@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use super::course_evaluation_data::CourseEvaluationData;
 use super::helpers::full_image_path;
 use super::question_data::QuestionData;
-use super::traits::Hashable;
+use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, Clone, Debug)]

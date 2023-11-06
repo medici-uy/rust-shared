@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::helpers::format_text;
-use super::traits::Hashable;
+use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, Clone, Debug)]

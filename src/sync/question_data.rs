@@ -10,7 +10,7 @@ use uuid::Uuid;
 use super::course_evaluation_data::CourseEvaluationData;
 use super::helpers::{format_text, full_image_path};
 use super::question_option_data::QuestionOptionData;
-use super::traits::Hashable;
+use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, Clone, Debug)]

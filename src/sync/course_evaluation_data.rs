@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use super::traits::Hashable;
+use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, PartialEq, Hash, Eq, Clone, Debug)]
