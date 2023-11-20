@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use super::{CourseData, QuestionData, QuestionOptionData, QuestionSourceData};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct SyncData {
     pub courses: CoursesSyncData,
     pub questions: QuestionsSyncData,
