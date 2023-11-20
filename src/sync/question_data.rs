@@ -9,6 +9,7 @@ use uuid::Uuid;
 use super::helpers::{format_text, full_image_path};
 use super::question_option_data::QuestionOptionData;
 use super::question_source_data::QuestionSourceData;
+use super::question_topic_data::QuestionTopicData;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
@@ -20,7 +21,7 @@ pub struct QuestionData {
     pub source: QuestionSourceData,
     pub text: String,
     pub explanation: Option<String>,
-    pub topic: String,
+    pub topic: QuestionTopicData,
     pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
     #[serde(skip)]
@@ -45,11 +46,11 @@ impl QuestionData {
     ) -> Result<Self> {
         let mut data = Self {
             id,
-            course_key,
+            course_key: course_key.clone(),
             source,
             text,
             explanation,
-            topic,
+            topic: QuestionTopicData::new(course_key, topic)?,
             tags,
             image_file_name,
             question_options,
@@ -172,8 +173,6 @@ impl QuestionData {
             }
         });
 
-        self.topic = self.topic.trim().to_string();
-
         self.tags = self
             .tags
             .iter()
@@ -183,12 +182,7 @@ impl QuestionData {
     }
 
     pub fn topic_key(&self) -> String {
-        format!(
-            "{}{}{}",
-            self.course_key,
-            Self::TOPIC_KEY_SEPARATOR,
-            self.topic
-        )
+        self.topic.key()
     }
 
     pub fn source_key(&self) -> String {
@@ -216,7 +210,7 @@ impl Hashable for QuestionData {
             bytes.extend(format!("explanation {explanation}").as_bytes());
         }
 
-        bytes.extend(format!("topic {}", self.topic).as_bytes());
+        bytes.extend(format!("topic {}", self.topic_key()).as_bytes());
 
         bytes.extend(self.tags.iter().flat_map(|tag| tag.as_bytes()));
 
@@ -257,8 +251,13 @@ mod tests {
             vec![],
             None,
             vec![],
-            QuestionSourceData::new(course_key, QuestionSourceType::SelfAssessment, None, None)
-                .unwrap(),
+            QuestionSourceData::new(
+                course_key.clone(),
+                QuestionSourceType::SelfAssessment,
+                None,
+                None,
+            )
+            .unwrap(),
         );
 
         assert!(result.is_err());
