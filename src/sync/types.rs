@@ -7,25 +7,41 @@ use super::{CourseData, QuestionData, QuestionOptionData, QuestionSourceData};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SyncData {
-    pub courses_to_sync: Vec<CourseData>,
-    pub courses_to_delete: Vec<String>,
-
-    pub questions_to_sync: Vec<QuestionData>,
-    pub questions_to_delete: Vec<Uuid>,
-
-    pub question_options_to_sync: Vec<QuestionOptionData>,
-    pub question_options_to_delete: Vec<Uuid>,
-
-    pub course_evaluations_to_sync: Vec<QuestionSourceData>,
-    pub course_evaluations_to_delete: Vec<String>,
-
+    pub courses: CoursesSyncData,
+    pub questions: QuestionsSyncData,
+    pub question_options: QuestionOptionsSyncData,
+    pub question_sources: QuestionSourcesSyncData,
     pub avatar_file_names: HashSet<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct CoursesSyncData {
+    pub for_sync: HashSet<CourseData>,
+    pub for_deletion: HashSet<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct QuestionsSyncData {
+    pub for_sync: HashSet<QuestionData>,
+    pub for_deletion: HashSet<Uuid>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct QuestionOptionsSyncData {
+    pub for_sync: HashSet<QuestionOptionData>,
+    pub for_deletion: HashSet<Uuid>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct QuestionSourcesSyncData {
+    pub for_sync: HashSet<QuestionSourceData>,
+    pub for_deletion: HashSet<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SyncMetadata {
-    pub courses_metadata: HashMap<String, String>,
-    pub questions_metadata: HashMap<Uuid, String>,
-    pub question_options_metadata: HashMap<Uuid, String>,
-    pub course_evaluations_metadata: HashMap<String, String>,
+    pub courses: HashMap<String, String>,
+    pub questions: HashMap<Uuid, String>,
+    pub question_options: HashMap<Uuid, String>,
+    pub question_sources: HashSet<String>,
 }

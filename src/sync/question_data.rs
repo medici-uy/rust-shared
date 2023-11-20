@@ -12,7 +12,7 @@ use super::question_source_data::QuestionSourceData;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
 pub struct QuestionData {
     pub id: Uuid,
 

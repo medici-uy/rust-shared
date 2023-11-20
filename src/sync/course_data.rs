@@ -10,7 +10,7 @@ use super::question_data::QuestionData;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
 pub struct CourseData {
     pub key: String,
 

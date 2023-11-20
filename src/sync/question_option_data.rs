@@ -6,7 +6,7 @@ use super::helpers::format_text;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
 pub struct QuestionOptionData {
     pub id: Uuid,
 
