@@ -39,7 +39,7 @@ impl QuestionSourceData {
             "{}{}{}{}{}{}{}",
             self.course_key,
             Self::KEY_SEPARATOR,
-            serde_json::to_string(&self.r#type).expect("invalid question source type"),
+            self.r#type,
             Self::KEY_SEPARATOR,
             self.name.as_deref().unwrap_or(Self::EMPTY_FIELD_KEY_VALUE),
             Self::KEY_SEPARATOR,
@@ -50,9 +50,10 @@ impl QuestionSourceData {
     }
 
     fn check(&self) -> Result<()> {
-        if (self.date.is_none() || self.name.is_none())
+        if (self.date.is_none()
             && (self.r#type == QuestionSourceType::Exam
-                || self.r#type == QuestionSourceType::Partial)
+                || self.r#type == QuestionSourceType::Partial))
+            || (self.name.is_none() && self.r#type == QuestionSourceType::Partial)
         {
             bail!("invalid data in question source with key {}", self.key());
         }
@@ -68,10 +69,21 @@ impl QuestionSourceData {
 }
 
 #[derive(
-    sqlx::Type, Serialize, Deserialize, PartialEq, Hash, Eq, PartialOrd, Ord, Clone, Debug,
+    sqlx::Type,
+    strum::Display,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Hash,
+    Eq,
+    PartialOrd,
+    Ord,
+    Clone,
+    Debug,
 )]
 #[sqlx(type_name = "text", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum QuestionSourceType {
     Exam,
     Partial,

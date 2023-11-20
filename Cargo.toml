@@ -22,5 +22,6 @@ sqlx = { version = "0.7.2", default-features = false, features = [
     "postgres",
     "macros",
 ] }
+strum = { version = "0.25.0", features = ["derive"] }
 tokio = { version = "1.34.0", features = ["full"] }
 uuid = { version = "1.6.0", features = ["std", "v4", "serde"] }
