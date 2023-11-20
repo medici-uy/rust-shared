@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 use anyhow::{bail, Result};
@@ -7,6 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use super::helpers::full_image_path;
 use super::question_data::QuestionData;
+use super::question_source_data::QuestionSourceData;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
@@ -108,6 +110,14 @@ impl CourseData {
 
     pub fn full_image_path(&self) -> Option<String> {
         Some(full_image_path(&self.key, self.image_file_name.as_ref()?))
+    }
+
+    pub fn question_sources(&self) -> HashSet<QuestionSourceData> {
+        HashSet::from_iter(
+            self.questions
+                .iter()
+                .map(|question| question.source.clone()),
+        )
     }
 }
 
