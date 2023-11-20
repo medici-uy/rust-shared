@@ -14,25 +14,25 @@ pub struct SyncData {
     pub avatar_file_names: HashSet<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct CoursesSyncData {
     pub for_sync: HashSet<CourseData>,
     pub for_deletion: HashSet<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct QuestionsSyncData {
     pub for_sync: HashSet<QuestionData>,
     pub for_deletion: HashSet<Uuid>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct QuestionOptionsSyncData {
     pub for_sync: HashSet<QuestionOptionData>,
     pub for_deletion: HashSet<Uuid>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct QuestionSourcesSyncData {
     pub for_sync: HashSet<QuestionSourceData>,
     pub for_deletion: HashSet<String>,
