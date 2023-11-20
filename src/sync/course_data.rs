@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use super::helpers::full_image_path;
 use super::question_data::QuestionData;
 use super::question_source_data::QuestionSourceData;
+use super::question_topic_data::QuestionTopicData;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
@@ -110,6 +111,10 @@ impl CourseData {
 
     pub fn full_image_path(&self) -> Option<String> {
         Some(full_image_path(&self.key, self.image_file_name.as_ref()?))
+    }
+
+    pub fn question_topics(&self) -> HashSet<QuestionTopicData> {
+        HashSet::from_iter(self.questions.iter().map(|question| question.topic.clone()))
     }
 
     pub fn question_sources(&self) -> HashSet<QuestionSourceData> {
