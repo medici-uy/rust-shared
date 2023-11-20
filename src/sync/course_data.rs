@@ -5,7 +5,6 @@ use anyhow::{bail, Result};
 use rust_decimal::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use super::course_evaluation_data::CourseEvaluationData;
 use super::helpers::full_image_path;
 use super::question_data::QuestionData;
 use crate::traits::Hashable;
@@ -24,8 +23,6 @@ pub struct CourseData {
     pub order: Option<u16>,
     #[serde(skip)]
     pub questions: Vec<QuestionData>,
-    #[serde(skip)]
-    pub evaluations: Vec<CourseEvaluationData>,
 
     pub hash: String,
 }
@@ -41,7 +38,6 @@ impl CourseData {
         year: Option<u16>,
         order: Option<u16>,
         questions: Vec<QuestionData>,
-        evaluations: Vec<CourseEvaluationData>,
     ) -> Result<Self> {
         let mut data = Self {
             key,
@@ -53,7 +49,6 @@ impl CourseData {
             year,
             order,
             questions,
-            evaluations,
             hash: Default::default(),
         };
 
@@ -76,8 +71,8 @@ impl CourseData {
 
     fn sort(&mut self) {
         self.questions
-            .sort_by(|a, b| match a.evaluation.cmp(&b.evaluation) {
-                Ordering::Equal => match a.asked_at.cmp(&b.asked_at) {
+            .sort_by(|a, b| match a.source.r#type.cmp(&b.source.r#type) {
+                Ordering::Equal => match a.source.date.cmp(&b.source.date) {
                     Ordering::Equal => match a.text.cmp(&b.text) {
                         Ordering::Equal => a.id.cmp(&b.id),
                         ordering => ordering,
@@ -148,11 +143,6 @@ impl Hashable for CourseData {
             self.questions
                 .iter()
                 .flat_map(|question| question.hash.as_bytes()),
-        );
-        bytes.extend(
-            self.evaluations
-                .iter()
-                .flat_map(|evaluation| evaluation.hash.as_bytes()),
         );
 
         bytes

@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::{CourseData, CourseEvaluationData, QuestionData, QuestionOptionData};
+use super::{CourseData, QuestionData, QuestionOptionData, QuestionSourceData};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SyncData {
@@ -16,7 +16,7 @@ pub struct SyncData {
     pub question_options_to_sync: Vec<QuestionOptionData>,
     pub question_options_to_delete: Vec<Uuid>,
 
-    pub course_evaluations_to_sync: Vec<CourseEvaluationData>,
+    pub course_evaluations_to_sync: Vec<QuestionSourceData>,
     pub course_evaluations_to_delete: Vec<String>,
 
     pub avatar_file_names: HashSet<String>,

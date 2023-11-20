@@ -3,13 +3,12 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 
 use anyhow::{bail, Result};
-use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::course_evaluation_data::CourseEvaluationData;
 use super::helpers::{format_text, full_image_path};
 use super::question_option_data::QuestionOptionData;
+use super::question_source_data::QuestionSourceData;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
@@ -18,12 +17,10 @@ pub struct QuestionData {
     pub id: Uuid,
 
     pub course_key: String,
-    pub evaluation: String,
-    pub source: String,
-    pub asked_at: Option<NaiveDate>,
+    pub source: QuestionSourceData,
     pub text: String,
     pub explanation: Option<String>,
-    pub topic: Option<String>,
+    pub topic: String,
     pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
     #[serde(skip)]
@@ -33,25 +30,23 @@ pub struct QuestionData {
 }
 
 impl QuestionData {
+    pub const TOPIC_KEY_SEPARATOR: &'static str = "::";
+
     pub fn new(
         id: Uuid,
         course_key: String,
         text: String,
         explanation: Option<String>,
-        topic: Option<String>,
+        topic: String,
         tags: Vec<String>,
         image_file_name: Option<PathBuf>,
         question_options: Vec<QuestionOptionData>,
-        evaluation: String,
-        source: String,
-        asked_at: Option<NaiveDate>,
+        source: QuestionSourceData,
     ) -> Result<Self> {
         let mut data = Self {
             id,
             course_key,
-            evaluation,
             source,
-            asked_at,
             text,
             explanation,
             topic,
@@ -99,7 +94,7 @@ impl QuestionData {
 
     pub fn eq_data(&self, other: &Self) -> bool {
         self.text == other.text
-            && self.evaluation == other.evaluation
+            && self.source == other.source
             && self.question_options.len() == other.question_options.len()
             && self
                 .question_options
@@ -177,7 +172,7 @@ impl QuestionData {
             }
         });
 
-        self.topic = self.topic.as_ref().map(|topic| topic.trim().to_string());
+        self.topic = self.topic.trim().to_string();
 
         self.tags = self
             .tags
@@ -187,8 +182,17 @@ impl QuestionData {
             .collect();
     }
 
-    pub fn full_evaluation_key(&self) -> String {
-        CourseEvaluationData::do_full_key(&self.course_key, &self.evaluation)
+    pub fn topic_key(&self) -> String {
+        format!(
+            "{}{}{}",
+            self.course_key,
+            Self::TOPIC_KEY_SEPARATOR,
+            self.topic
+        )
+    }
+
+    pub fn source_key(&self) -> String {
+        self.source.key()
     }
 
     pub fn full_image_path(&self) -> Option<String> {
@@ -212,9 +216,7 @@ impl Hashable for QuestionData {
             bytes.extend(format!("explanation {explanation}").as_bytes());
         }
 
-        if let Some(topic) = &self.topic {
-            bytes.extend(format!("topic {topic}").as_bytes());
-        }
+        bytes.extend(format!("topic {}", self.topic).as_bytes());
 
         bytes.extend(self.tags.iter().flat_map(|tag| tag.as_bytes()));
 
@@ -230,12 +232,7 @@ impl Hashable for QuestionData {
                 .flat_map(|question_option| question_option.hash.as_bytes()),
         );
 
-        bytes.extend(self.evaluation.as_bytes());
-        bytes.extend(self.source.as_bytes());
-
-        if let Some(asked_at) = self.asked_at {
-            bytes.extend(format!("asked_at {}", asked_at).as_bytes());
-        }
+        bytes.extend(self.source_key().as_bytes());
 
         bytes
     }
@@ -243,22 +240,25 @@ impl Hashable for QuestionData {
 
 #[cfg(test)]
 mod tests {
+    use crate::sync::QuestionSourceType;
+
     use super::*;
 
     #[test]
     fn test_check() {
+        let course_key = "course".to_string();
+
         let result = QuestionData::new(
             Uuid::new_v4(),
-            "course".into(),
+            course_key.clone(),
             "text".into(),
             None,
-            None,
+            "topic".into(),
             vec![],
             None,
             vec![],
-            "eva".into(),
-            "source".into(),
-            None,
+            QuestionSourceData::new(course_key, QuestionSourceType::SelfAssessment, None, None)
+                .unwrap(),
         );
 
         assert!(result.is_err());
