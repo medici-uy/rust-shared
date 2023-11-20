@@ -8,13 +8,19 @@ use super::{CourseData, QuestionData, QuestionOptionData, QuestionSourceData, Qu
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct SyncData {
-    pub courses: ElementSyncData<CourseData, String>,
-    pub questions: ElementSyncData<QuestionData, Uuid>,
-    pub question_options: ElementSyncData<QuestionOptionData, Uuid>,
-    pub question_topics: ElementSyncData<QuestionTopicData, String>,
-    pub question_sources: ElementSyncData<QuestionSourceData, String>,
+    pub courses: CoursesSyncData,
+    pub questions: QuestionsSyncData,
+    pub question_options: QuestionOptionsSyncData,
+    pub question_topics: QuestionTopicsSyncData,
+    pub question_sources: QuestionSourcesSyncData,
     pub avatar_file_names: HashSet<String>,
 }
+
+pub type CoursesSyncData = ElementSyncData<CourseData, String>;
+pub type QuestionsSyncData = ElementSyncData<QuestionData, Uuid>;
+pub type QuestionOptionsSyncData = ElementSyncData<QuestionOptionData, Uuid>;
+pub type QuestionTopicsSyncData = ElementSyncData<QuestionTopicData, String>;
+pub type QuestionSourcesSyncData = ElementSyncData<QuestionSourceData, String>;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ElementSyncData<T: Eq + Hash, K: Eq + Hash> {
