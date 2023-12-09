@@ -23,6 +23,7 @@ pub struct QuestionData {
     pub text: String,
     pub explanation: Option<ExplanationData>,
     pub topic: QuestionTopicData,
+    pub topic_by: Option<String>,
     pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
     #[serde(skip)]
@@ -40,6 +41,7 @@ impl QuestionData {
         text: String,
         explanation: Option<ExplanationData>,
         topic: String,
+        topic_by: Option<String>,
         tags: Vec<String>,
         image_file_name: Option<PathBuf>,
         question_options: Vec<QuestionOptionData>,
@@ -52,6 +54,7 @@ impl QuestionData {
             text,
             explanation,
             topic: QuestionTopicData::new(course_key, topic)?,
+            topic_by,
             tags,
             image_file_name,
             question_options,
@@ -201,7 +204,11 @@ impl Hashable for QuestionData {
             bytes.extend(format!("explanation {}", explanation.hash).as_bytes());
         }
 
-        bytes.extend(format!("topic {}", self.topic_key()).as_bytes());
+        bytes.extend(self.topic_key().as_bytes());
+
+        if let Some(topic_by) = &self.topic_by {
+            bytes.extend(format!("topic_by {topic_by}").as_bytes());
+        }
 
         bytes.extend(self.tags.iter().flat_map(|tag| tag.as_bytes()));
 
@@ -239,6 +246,7 @@ mod tests {
             "text".into(),
             None,
             "topic".into(),
+            None,
             vec![],
             None,
             vec![],
