@@ -10,6 +10,7 @@ pub struct QuestionTopicData {
 
 impl QuestionTopicData {
     pub const KEY_SEPARATOR: &'static str = "::";
+    pub const DEFAULT_NAME: &'static str = "_";
 
     pub fn new(course_key: String, name: String) -> Result<Self> {
         let mut data = Self { course_key, name };
@@ -25,6 +26,10 @@ impl QuestionTopicData {
 
     pub fn is_blank(&self) -> bool {
         self.name.is_empty()
+    }
+
+    pub fn is_default(&self) -> bool {
+        self.name == Self::DEFAULT_NAME
     }
 
     fn format(&mut self) {
