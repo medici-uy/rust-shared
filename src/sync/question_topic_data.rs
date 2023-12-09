@@ -28,8 +28,8 @@ impl QuestionTopicData {
         self.name.is_empty()
     }
 
-    pub fn is_default(&self) -> bool {
-        self.name == Self::DEFAULT_NAME
+    pub fn is_default(topic: &str) -> bool {
+        topic == Self::DEFAULT_NAME
     }
 
     fn format(&mut self) {
