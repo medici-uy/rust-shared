@@ -183,6 +183,13 @@ impl QuestionData {
         self.source.key()
     }
 
+    pub fn set_topic(&mut self, topic: String, topic_by: Option<String>) -> Result<()> {
+        self.topic = QuestionTopicData::new(self.course_key.clone(), topic)?;
+        self.topic_by = topic_by;
+
+        Ok(())
+    }
+
     pub fn full_image_path(&self) -> Option<String> {
         Some(full_image_path(
             &self.course_key,

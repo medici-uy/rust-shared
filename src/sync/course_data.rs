@@ -26,6 +26,8 @@ pub struct CourseData {
     pub order: Option<u16>,
     #[serde(skip)]
     pub questions: Vec<QuestionData>,
+    #[serde(skip)]
+    pub topics: Vec<String>,
 
     pub hash: String,
 }
@@ -41,6 +43,7 @@ impl CourseData {
         year: Option<u16>,
         order: Option<u16>,
         questions: Vec<QuestionData>,
+        topics: Vec<String>,
     ) -> Result<Self> {
         let mut data = Self {
             key,
@@ -52,6 +55,7 @@ impl CourseData {
             year,
             order,
             questions,
+            topics,
             hash: Default::default(),
         };
 
