@@ -6,6 +6,7 @@ use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use super::explanation_data::ExplanationData;
 use super::helpers::{format_text, full_image_path};
 use super::question_option_data::QuestionOptionData;
 use super::question_source_data::QuestionSourceData;
@@ -20,7 +21,7 @@ pub struct QuestionData {
     pub course_key: String,
     pub source: QuestionSourceData,
     pub text: String,
-    pub explanation: Option<String>,
+    pub explanation: Option<ExplanationData>,
     pub topic: QuestionTopicData,
     pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
@@ -37,7 +38,7 @@ impl QuestionData {
         id: Uuid,
         course_key: String,
         text: String,
-        explanation: Option<String>,
+        explanation: Option<ExplanationData>,
         topic: String,
         tags: Vec<String>,
         image_file_name: Option<PathBuf>,
@@ -163,16 +164,6 @@ impl QuestionData {
     fn format(&mut self) {
         self.text = format_text(&self.text);
 
-        self.explanation = self.explanation.as_mut().and_then(|original_explanation| {
-            let explanation = original_explanation.trim().to_string();
-
-            if explanation.is_empty() {
-                None
-            } else {
-                Some(explanation)
-            }
-        });
-
         self.tags = self
             .tags
             .iter()
@@ -207,7 +198,7 @@ impl Hashable for QuestionData {
         bytes.extend(self.text.as_bytes());
 
         if let Some(explanation) = &self.explanation {
-            bytes.extend(format!("explanation {explanation}").as_bytes());
+            bytes.extend(format!("explanation {}", explanation.hash).as_bytes());
         }
 
         bytes.extend(format!("topic {}", self.topic_key()).as_bytes());

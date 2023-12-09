@@ -1,4 +1,5 @@
 mod course_data;
+mod explanation_data;
 mod helpers;
 mod question_data;
 mod question_option_data;
@@ -7,6 +8,7 @@ mod question_topic_data;
 mod types;
 
 pub use course_data::*;
+pub use explanation_data::*;
 pub use helpers::*;
 pub use question_data::*;
 pub use question_option_data::*;
