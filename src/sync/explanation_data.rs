@@ -26,7 +26,7 @@ impl ExplanationData {
         data.format();
         data.check()?;
 
-        data.hash = data.hash();
+        data.refresh_hash();
 
         Ok(data)
     }
@@ -54,5 +54,9 @@ impl Hashable for ExplanationData {
         bytes.extend(self.date.to_rfc3339().as_bytes());
 
         bytes
+    }
+
+    fn refresh_hash(&mut self) {
+        self.hash = self.hash();
     }
 }

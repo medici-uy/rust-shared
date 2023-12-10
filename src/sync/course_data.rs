@@ -61,8 +61,6 @@ impl CourseData {
 
         data.process()?;
 
-        data.hash = data.hash();
-
         Ok(data)
     }
 
@@ -72,6 +70,8 @@ impl CourseData {
         self.sort();
         self.deduplicate();
         self.check()?;
+
+        self.refresh_hash();
 
         Ok(())
     }
@@ -164,5 +164,9 @@ impl Hashable for CourseData {
         );
 
         bytes
+    }
+
+    fn refresh_hash(&mut self) {
+        self.hash = self.hash();
     }
 }

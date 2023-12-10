@@ -61,19 +61,25 @@ impl QuestionData {
             hash: Default::default(),
         };
 
-        data.remove_blank_options();
-        data.format();
-        data.sort();
-        data.deduplicate();
-        data.check()?;
-
-        data.hash = data.hash();
+        data.process()?;
 
         Ok(data)
     }
 
     pub fn is_blank(&self) -> bool {
         self.text.is_empty() && self.question_options.is_empty()
+    }
+
+    pub fn process(&mut self) -> Result<()> {
+        self.remove_blank_options();
+        self.format();
+        self.sort();
+        self.deduplicate();
+        self.check()?;
+
+        self.refresh_hash();
+
+        Ok(())
     }
 
     fn sort(&mut self) {
@@ -187,6 +193,8 @@ impl QuestionData {
         self.topic = QuestionTopicData::new(self.course_key.clone(), topic)?;
         self.topic_by = topic_by;
 
+        self.process()?;
+
         Ok(())
     }
 
@@ -234,6 +242,10 @@ impl Hashable for QuestionData {
         bytes.extend(self.source_key().as_bytes());
 
         bytes
+    }
+
+    fn refresh_hash(&mut self) {
+        self.hash = self.hash();
     }
 }
 

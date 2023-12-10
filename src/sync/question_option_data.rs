@@ -30,7 +30,7 @@ impl QuestionOptionData {
         data.format();
         data.check()?;
 
-        data.hash = data.hash();
+        data.refresh_hash();
 
         Ok(data)
     }
@@ -77,6 +77,10 @@ impl Hashable for QuestionOptionData {
         bytes.push(self.correct as u8);
 
         bytes
+    }
+
+    fn refresh_hash(&mut self) {
+        self.hash = self.hash();
     }
 }
 

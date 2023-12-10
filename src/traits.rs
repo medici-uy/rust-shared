@@ -6,6 +6,8 @@ pub trait Hashable {
     fn hash(&self) -> String {
         blake3::hash(&self.hashable_data()).to_string()
     }
+
+    fn refresh_hash(&mut self);
 }
 
 pub trait EmailTemplate: Serialize + Sized {
