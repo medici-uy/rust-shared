@@ -107,7 +107,6 @@ impl CourseData {
     }
 
     fn format(&mut self) {
-        self.key = self.key.trim().into();
         self.name = self.name.trim().into();
         self.short_name = self.short_name.trim().into();
         self.tags = self.tags.iter().map(|tag| tag.trim().into()).collect();
