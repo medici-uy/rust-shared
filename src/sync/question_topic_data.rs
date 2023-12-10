@@ -28,11 +28,15 @@ impl QuestionTopicData {
         self.name.is_empty()
     }
 
-    pub fn is_default(topic: &str) -> bool {
-        topic == Self::DEFAULT_NAME
+    pub fn is_default(&self) -> bool {
+        Self::is_default_topic_name(&self.name)
     }
 
     fn format(&mut self) {
         self.name = self.name.trim().into();
+    }
+
+    pub fn is_default_topic_name(name: &str) -> bool {
+        name == Self::DEFAULT_NAME
     }
 }
