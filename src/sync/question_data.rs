@@ -237,6 +237,19 @@ impl Hashable for QuestionData {
     }
 }
 
+impl std::fmt::Display for QuestionData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let question_options_string = self.question_options.iter().enumerate().fold(
+            String::new(),
+            |acc, (index, question_option)| {
+                format!("{acc}\n{}. {question_option}", (97 + index as u8) as char)
+            },
+        );
+
+        write!(f, "{}\n{}", self.text, question_options_string)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::sync::QuestionSourceType;

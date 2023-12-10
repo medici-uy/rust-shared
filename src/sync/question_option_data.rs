@@ -80,6 +80,12 @@ impl Hashable for QuestionOptionData {
     }
 }
 
+impl std::fmt::Display for QuestionOptionData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.text)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
