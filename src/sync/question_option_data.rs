@@ -27,12 +27,18 @@ impl QuestionOptionData {
             hash: Default::default(),
         };
 
-        data.format();
-        data.check()?;
-
-        data.refresh_hash();
+        data.process()?;
 
         Ok(data)
+    }
+
+    pub fn process(&mut self) -> Result<()> {
+        self.format();
+        self.check()?;
+
+        self.refresh_hash();
+
+        Ok(())
     }
 
     pub fn is_blank(&self) -> bool {

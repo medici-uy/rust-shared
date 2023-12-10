@@ -15,20 +15,26 @@ pub struct ExplanationData {
 }
 
 impl ExplanationData {
-    pub fn new(text: String, explained_by: String, explained_at: DateTime<Utc>) -> Result<Self> {
+    pub fn new(text: String, by: String, date: DateTime<Utc>) -> Result<Self> {
         let mut data = Self {
             text,
-            by: explained_by,
-            date: explained_at,
+            by,
+            date,
             hash: Default::default(),
         };
 
-        data.format();
-        data.check()?;
-
-        data.refresh_hash();
+        data.process()?;
 
         Ok(data)
+    }
+
+    fn process(&mut self) -> Result<()> {
+        self.format();
+        self.check()?;
+
+        self.refresh_hash();
+
+        Ok(())
     }
 
     fn check(&self) -> Result<()> {

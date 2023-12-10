@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 
 use anyhow::{bail, Result};
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -189,13 +190,18 @@ impl QuestionData {
         self.source.key()
     }
 
-    pub fn set_topic(&mut self, topic: String, topic_by: Option<String>) -> Result<()> {
-        self.topic = QuestionTopicData::new(self.course_key.clone(), topic)?;
+    pub fn set_topic(&mut self, name: String, topic_by: Option<String>) -> Result<()> {
+        self.topic = QuestionTopicData::new(self.course_key.clone(), name)?;
         self.topic_by = topic_by;
 
-        self.process()?;
+        self.process()
+    }
 
-        Ok(())
+    pub fn set_explanation(&mut self, text: String, by: String) -> Result<()> {
+        self.explanation
+            .replace(ExplanationData::new(text, by, Utc::now())?);
+
+        self.process()
     }
 
     pub fn full_image_path(&self) -> Option<String> {
