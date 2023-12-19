@@ -216,8 +216,6 @@ impl Hashable for QuestionData {
     fn hashable_data(&self) -> Vec<u8> {
         let mut bytes = vec![];
 
-        bytes.extend(self.id.as_bytes());
-
         bytes.extend(self.course_key.as_bytes());
         bytes.extend(self.text.as_bytes());
 

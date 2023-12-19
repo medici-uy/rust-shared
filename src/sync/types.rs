@@ -4,7 +4,9 @@ use std::hash::Hash;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::{CourseData, QuestionData, QuestionOptionData, QuestionSourceData, QuestionTopicData};
+use super::{
+    BundleData, CourseData, QuestionData, QuestionOptionData, QuestionSourceData, QuestionTopicData,
+};
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct SyncData {
@@ -13,6 +15,7 @@ pub struct SyncData {
     pub question_options: QuestionOptionsSyncData,
     pub question_topics: QuestionTopicsSyncData,
     pub question_sources: QuestionSourcesSyncData,
+    pub bundles: BundlesSyncData,
     pub avatar_file_names: HashSet<String>,
 }
 
@@ -21,6 +24,7 @@ pub type QuestionsSyncData = ElementSyncData<QuestionData, Uuid>;
 pub type QuestionOptionsSyncData = ElementSyncData<QuestionOptionData, Uuid>;
 pub type QuestionTopicsSyncData = ElementSyncData<QuestionTopicData, String>;
 pub type QuestionSourcesSyncData = ElementSyncData<QuestionSourceData, String>;
+pub type BundlesSyncData = ElementSyncData<BundleData, String>;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ElementSyncData<T: Eq + Hash, K: Eq + Hash> {
@@ -36,6 +40,7 @@ impl<T: Eq + Hash, K: Eq + Hash> Default for ElementSyncData<T, K> {
         }
     }
 }
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SyncMetadata {
     pub courses: HashMap<String, String>,
@@ -43,4 +48,5 @@ pub struct SyncMetadata {
     pub question_options: HashMap<Uuid, String>,
     pub question_topics: HashSet<String>,
     pub question_sources: HashSet<String>,
+    pub bundles: HashMap<String, String>,
 }

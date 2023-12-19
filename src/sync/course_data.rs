@@ -133,7 +133,6 @@ impl Hashable for CourseData {
     fn hashable_data(&self) -> Vec<u8> {
         let mut bytes = vec![];
 
-        bytes.extend(self.key.as_bytes());
         bytes.extend(self.name.as_bytes());
         bytes.extend(self.short_name.as_bytes());
 

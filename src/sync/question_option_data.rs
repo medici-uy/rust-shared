@@ -77,7 +77,6 @@ impl Hashable for QuestionOptionData {
     fn hashable_data(&self) -> Vec<u8> {
         let mut bytes = vec![];
 
-        bytes.extend(self.id.as_bytes());
         bytes.extend(self.question_id.as_bytes());
         bytes.extend(self.text.as_bytes());
         bytes.push(self.correct as u8);
