@@ -76,6 +76,18 @@ impl CourseData {
         Ok(())
     }
 
+    pub fn replace_question(&mut self, new_question: QuestionData) -> Result<()> {
+        let old_question = self
+            .questions
+            .iter_mut()
+            .find(|question| question.id == new_question.id)
+            .expect("question to replace not found");
+
+        *old_question = new_question;
+
+        self.process()
+    }
+
     fn sort(&mut self) {
         self.questions
             .sort_by(|a, b| match a.source.r#type.cmp(&b.source.r#type) {
