@@ -25,12 +25,12 @@ pub fn format_text(text: &str) -> String {
     formatted
 }
 
-pub fn full_image_path<P>(course_key: &str, image_file_name: P) -> String
+pub fn full_image_path<P>(key: &str, image_file_name: P) -> String
 where
     P: AsRef<Path>,
 {
     format!(
-        "{course_key}/{}",
+        "{key}/{}",
         image_file_name
             .as_ref()
             .as_os_str()

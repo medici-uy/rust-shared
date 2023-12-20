@@ -3,6 +3,7 @@ use rust_decimal::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+use super::helpers::full_image_path;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
@@ -19,6 +20,8 @@ pub struct BundleData {
 }
 
 impl BundleData {
+    pub const IMAGES_KEY: &'static str = "bundles";
+
     pub fn new(
         key: String,
         name: String,
@@ -64,6 +67,13 @@ impl BundleData {
     fn format(&mut self) {
         self.key = self.key.trim().to_string();
         self.name = self.name.trim().to_string();
+    }
+
+    pub fn full_image_path(&self) -> Option<String> {
+        Some(full_image_path(
+            Self::IMAGES_KEY,
+            self.image_file_name.as_ref()?,
+        ))
     }
 }
 
