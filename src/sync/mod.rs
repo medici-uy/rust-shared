@@ -1,4 +1,5 @@
 mod bundle_data;
+mod constants;
 mod course_data;
 mod explanation_data;
 mod helpers;
@@ -9,6 +10,7 @@ mod question_topic_data;
 mod types;
 
 pub use bundle_data::*;
+pub use constants::*;
 pub use course_data::*;
 pub use explanation_data::*;
 pub use helpers::*;
