@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use anyhow::{bail, Result};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use tracing::debug;
 use uuid::Uuid;
 
 use super::explanation_data::ExplanationData;
@@ -145,7 +146,8 @@ impl QuestionData {
 
         for text in texts_iter {
             if texts_set.contains(text) {
-                bail!("duplicate question option. {self:?}");
+                debug!(question = ?self);
+                bail!("duplicate question option");
             } else {
                 texts_set.insert(text);
             }
