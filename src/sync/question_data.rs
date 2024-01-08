@@ -145,7 +145,7 @@ impl QuestionData {
 
         for text in texts_iter {
             if texts_set.contains(text) {
-                bail!("duplicate question option. Text: \"{text}\"");
+                bail!("duplicate question option. {self:?}");
             } else {
                 texts_set.insert(text);
             }
