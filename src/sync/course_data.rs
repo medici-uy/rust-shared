@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
+use std::num::NonZeroU16;
 use std::path::PathBuf;
 
 use anyhow::{bail, Result};
@@ -19,11 +20,13 @@ pub struct CourseData {
 
     pub name: String,
     pub short_name: String,
+    pub description: Option<String>,
     pub price_in_uyu: Option<Decimal>,
     pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
     pub year: Option<u16>,
     pub order: Option<u16>,
+    pub questions_per_test: Option<NonZeroU16>,
     #[serde(skip)]
     pub questions: Vec<QuestionData>,
     #[serde(skip)]
@@ -37,11 +40,13 @@ impl CourseData {
         key: String,
         name: String,
         short_name: String,
+        description: Option<String>,
         price_in_uyu: Option<Decimal>,
         tags: Vec<String>,
         image_file_name: Option<PathBuf>,
         year: Option<u16>,
         order: Option<u16>,
+        questions_per_test: Option<NonZeroU16>,
         questions: Vec<QuestionData>,
         topics: Vec<String>,
     ) -> Result<Self> {
@@ -49,11 +54,13 @@ impl CourseData {
             key,
             name,
             short_name,
+            description,
             price_in_uyu,
             tags,
             image_file_name,
             year,
             order,
+            questions_per_test,
             questions,
             topics,
             hash: Default::default(),
@@ -121,6 +128,10 @@ impl CourseData {
     fn format(&mut self) {
         self.name = self.name.trim().into();
         self.short_name = self.short_name.trim().into();
+        self.description = self
+            .description
+            .as_ref()
+            .map(|description| description.trim().into());
         self.tags = self.tags.iter().map(|tag| tag.trim().into()).collect();
     }
 
@@ -148,8 +159,12 @@ impl Hashable for CourseData {
         bytes.extend(self.name.as_bytes());
         bytes.extend(self.short_name.as_bytes());
 
+        if let Some(description) = &self.description {
+            bytes.extend(format!("description {description}").as_bytes());
+        }
+
         if let Some(price_in_uyu) = &self.price_in_uyu {
-            bytes.extend(format!("price_in_uyu {}", price_in_uyu).as_bytes());
+            bytes.extend(format!("price_in_uyu {price_in_uyu}").as_bytes());
         }
 
         bytes.extend(self.tags.join(",").as_bytes());
@@ -166,6 +181,10 @@ impl Hashable for CourseData {
 
         if let Some(order) = self.order {
             bytes.extend(format!("order {order}").as_bytes());
+        }
+
+        if let Some(questions_per_test) = self.questions_per_test {
+            bytes.extend(format!("questions_per_test {questions_per_test}").as_bytes());
         }
 
         bytes.extend(
