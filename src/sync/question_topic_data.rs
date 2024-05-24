@@ -1,6 +1,8 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
+use crate::traits::Hashable;
+
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, PartialEq, Hash, Eq, Clone, Debug)]
 pub struct QuestionTopicData {
@@ -38,5 +40,11 @@ impl QuestionTopicData {
 
     pub fn is_default_topic_name(name: &str) -> bool {
         name == Self::DEFAULT_NAME
+    }
+}
+
+impl Hashable for QuestionTopicData {
+    fn to_bytes(&self) -> Vec<u8> {
+        self.key().to_bytes()
     }
 }

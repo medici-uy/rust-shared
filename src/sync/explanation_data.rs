@@ -5,13 +5,15 @@ use serde::{Deserialize, Serialize};
 use crate::traits::Hashable;
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
+#[derive(medici_macros::Hashable, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
 pub struct ExplanationData {
     pub text: String,
     pub by: String,
     pub date: DateTime<Utc>,
 
     pub hash: String,
+    #[serde(skip)]
+    pub _bytes: Vec<u8>,
 }
 
 impl ExplanationData {
@@ -21,6 +23,7 @@ impl ExplanationData {
             by,
             date,
             hash: Default::default(),
+            _bytes: Default::default(),
         };
 
         data.process()?;
@@ -48,21 +51,5 @@ impl ExplanationData {
     fn format(&mut self) {
         self.text = self.text.trim().to_string();
         self.by = self.by.trim().to_string();
-    }
-}
-
-impl Hashable for ExplanationData {
-    fn hashable_data(&self) -> Vec<u8> {
-        let mut bytes = vec![];
-
-        bytes.extend(self.text.as_bytes());
-        bytes.extend(self.by.as_bytes());
-        bytes.extend(self.date.to_rfc3339().as_bytes());
-
-        bytes
-    }
-
-    fn refresh_hash(&mut self) {
-        self.hash = self.hash();
     }
 }

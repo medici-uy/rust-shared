@@ -6,7 +6,7 @@ use super::helpers::format_text;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
+#[derive(medici_macros::Hashable, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
 pub struct QuestionOptionData {
     pub id: Uuid,
 
@@ -15,6 +15,8 @@ pub struct QuestionOptionData {
     pub correct: bool,
 
     pub hash: String,
+    #[serde(skip)]
+    pub _bytes: Vec<u8>,
 }
 
 impl QuestionOptionData {
@@ -25,6 +27,7 @@ impl QuestionOptionData {
             text,
             correct,
             hash: Default::default(),
+            _bytes: Default::default(),
         };
 
         data.process()?;
@@ -70,22 +73,6 @@ impl QuestionOptionData {
         if !self.text.ends_with(PERIOD) {
             self.text.push(PERIOD);
         }
-    }
-}
-
-impl Hashable for QuestionOptionData {
-    fn hashable_data(&self) -> Vec<u8> {
-        let mut bytes = vec![];
-
-        bytes.extend(self.question_id.as_bytes());
-        bytes.extend(self.text.as_bytes());
-        bytes.push(self.correct as u8);
-
-        bytes
-    }
-
-    fn refresh_hash(&mut self) {
-        self.hash = self.hash();
     }
 }
 

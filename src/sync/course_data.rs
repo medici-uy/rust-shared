@@ -14,7 +14,7 @@ use super::question_topic_data::QuestionTopicData;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
+#[derive(medici_macros::Hashable, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
 pub struct CourseData {
     pub key: String,
 
@@ -33,6 +33,8 @@ pub struct CourseData {
     pub topics: Vec<String>,
 
     pub hash: String,
+    #[serde(skip)]
+    pub _bytes: Vec<u8>,
 }
 
 impl CourseData {
@@ -64,6 +66,7 @@ impl CourseData {
             questions,
             topics,
             hash: Default::default(),
+            _bytes: Default::default(),
         };
 
         data.process()?;
@@ -149,54 +152,5 @@ impl CourseData {
                 .iter()
                 .map(|question| question.source.clone()),
         )
-    }
-}
-
-impl Hashable for CourseData {
-    fn hashable_data(&self) -> Vec<u8> {
-        let mut bytes = vec![];
-
-        bytes.extend(self.name.as_bytes());
-        bytes.extend(self.short_name.as_bytes());
-
-        if let Some(description) = &self.description {
-            bytes.extend(format!("description {description}").as_bytes());
-        }
-
-        if let Some(price_in_uyu) = &self.price_in_uyu {
-            bytes.extend(format!("price_in_uyu {price_in_uyu}").as_bytes());
-        }
-
-        bytes.extend(self.tags.join(",").as_bytes());
-
-        if let Some(image_file_name) = &self.image_file_name {
-            bytes.extend(
-                format!("image_file_name {}", image_file_name.to_string_lossy()).as_bytes(),
-            );
-        }
-
-        if let Some(year) = self.year {
-            bytes.extend(format!("year {year}").as_bytes());
-        }
-
-        if let Some(order) = self.order {
-            bytes.extend(format!("order {order}").as_bytes());
-        }
-
-        if let Some(questions_per_test) = self.questions_per_test {
-            bytes.extend(format!("questions_per_test {questions_per_test}").as_bytes());
-        }
-
-        bytes.extend(
-            self.questions
-                .iter()
-                .flat_map(|question| question.hash.as_bytes()),
-        );
-
-        bytes
-    }
-
-    fn refresh_hash(&mut self) {
-        self.hash = self.hash();
     }
 }

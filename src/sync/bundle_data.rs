@@ -7,7 +7,7 @@ use super::{helpers::full_image_path, BUNDLE_IMAGES_DIR_NAME};
 use crate::traits::Hashable;
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
+#[derive(medici_macros::Hashable, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
 pub struct BundleData {
     pub key: String,
 
@@ -17,6 +17,8 @@ pub struct BundleData {
     pub image_file_name: Option<PathBuf>,
 
     pub hash: String,
+    #[serde(skip)]
+    pub _bytes: Vec<u8>,
 }
 
 impl BundleData {
@@ -34,6 +36,7 @@ impl BundleData {
             discount,
             image_file_name,
             hash: Default::default(),
+            _bytes: Default::default(),
         };
 
         data.process()?;
@@ -72,27 +75,5 @@ impl BundleData {
             BUNDLE_IMAGES_DIR_NAME,
             self.image_file_name.as_ref()?,
         ))
-    }
-}
-
-impl Hashable for BundleData {
-    fn hashable_data(&self) -> Vec<u8> {
-        let mut bytes = vec![];
-
-        bytes.extend(self.name.as_bytes());
-        bytes.extend(self.course_keys.iter().flat_map(|key| key.as_bytes()));
-        bytes.extend(format!("discount {}", self.discount).as_bytes());
-
-        if let Some(image_file_name) = &self.image_file_name {
-            bytes.extend(
-                format!("image_file_name {}", image_file_name.to_string_lossy()).as_bytes(),
-            );
-        }
-
-        bytes
-    }
-
-    fn refresh_hash(&mut self) {
-        self.hash = self.hash();
     }
 }

@@ -2,6 +2,8 @@ use anyhow::{bail, Result};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
+use crate::traits::Hashable;
+
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, PartialEq, Hash, Eq, Clone, Debug)]
 pub struct QuestionSourceData {
@@ -65,6 +67,12 @@ impl QuestionSourceData {
         if let Some(name) = &self.name {
             self.name.replace(name.trim().into());
         }
+    }
+}
+
+impl Hashable for QuestionSourceData {
+    fn to_bytes(&self) -> Vec<u8> {
+        self.key().to_bytes()
     }
 }
 

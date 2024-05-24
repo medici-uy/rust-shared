@@ -16,7 +16,7 @@ use super::question_topic_data::QuestionTopicData;
 use crate::traits::Hashable;
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
+#[derive(medici_macros::Hashable, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
 pub struct QuestionData {
     pub id: Uuid,
 
@@ -32,6 +32,8 @@ pub struct QuestionData {
     pub question_options: Vec<QuestionOptionData>,
 
     pub hash: String,
+    #[serde(skip)]
+    pub _bytes: Vec<u8>,
 }
 
 impl QuestionData {
@@ -61,6 +63,7 @@ impl QuestionData {
             image_file_name,
             question_options,
             hash: Default::default(),
+            _bytes: Default::default(),
         };
 
         data.process()?;
@@ -211,47 +214,6 @@ impl QuestionData {
             &self.course_key,
             self.image_file_name.as_ref()?,
         ))
-    }
-}
-
-impl Hashable for QuestionData {
-    fn hashable_data(&self) -> Vec<u8> {
-        let mut bytes = vec![];
-
-        bytes.extend(self.course_key.as_bytes());
-        bytes.extend(self.text.as_bytes());
-
-        if let Some(explanation) = &self.explanation {
-            bytes.extend(format!("explanation {}", explanation.hash).as_bytes());
-        }
-
-        bytes.extend(self.topic_key().as_bytes());
-
-        if let Some(topic_by) = &self.topic_by {
-            bytes.extend(format!("topic_by {topic_by}").as_bytes());
-        }
-
-        bytes.extend(self.tags.iter().flat_map(|tag| tag.as_bytes()));
-
-        if let Some(image_file_name) = &self.image_file_name {
-            bytes.extend(
-                format!("image_file_name {}", image_file_name.to_string_lossy()).as_bytes(),
-            );
-        }
-
-        bytes.extend(
-            self.question_options
-                .iter()
-                .flat_map(|question_option| question_option.hash.as_bytes()),
-        );
-
-        bytes.extend(self.source_key().as_bytes());
-
-        bytes
-    }
-
-    fn refresh_hash(&mut self) {
-        self.hash = self.hash();
     }
 }
 
