@@ -1,4 +1,4 @@
-use std::{num::NonZeroU16, path::PathBuf};
+use std::path::PathBuf;
 
 use chrono::{DateTime, Utc};
 use rust_decimal::prelude::*;
@@ -78,12 +78,6 @@ impl Hashable for u16 {
 impl Hashable for bool {
     fn to_bytes(&self) -> Vec<u8> {
         self.to_string().to_bytes()
-    }
-}
-
-impl Hashable for NonZeroU16 {
-    fn to_bytes(&self) -> Vec<u8> {
-        self.get().to_bytes()
     }
 }
 

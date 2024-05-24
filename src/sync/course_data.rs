@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
-use std::num::NonZeroU16;
 use std::path::PathBuf;
 
 use anyhow::{bail, Result};
@@ -26,7 +25,6 @@ pub struct CourseData {
     pub image_file_name: Option<PathBuf>,
     pub year: Option<u16>,
     pub order: Option<u16>,
-    pub questions_per_test: Option<NonZeroU16>,
     #[serde(skip)]
     pub questions: Vec<QuestionData>,
     #[serde(skip)]
@@ -46,7 +44,6 @@ impl CourseData {
         image_file_name: Option<PathBuf>,
         year: Option<u16>,
         order: Option<u16>,
-        questions_per_test: Option<NonZeroU16>,
         questions: Vec<QuestionData>,
         topics: Vec<String>,
     ) -> Result<Self> {
@@ -60,7 +57,6 @@ impl CourseData {
             image_file_name,
             year,
             order,
-            questions_per_test,
             questions,
             topics,
             hash: Default::default(),
