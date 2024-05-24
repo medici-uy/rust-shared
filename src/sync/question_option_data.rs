@@ -15,8 +15,6 @@ pub struct QuestionOptionData {
     pub correct: bool,
 
     pub hash: String,
-    #[serde(skip)]
-    pub _bytes: Vec<u8>,
 }
 
 impl QuestionOptionData {
@@ -27,7 +25,6 @@ impl QuestionOptionData {
             text,
             correct,
             hash: Default::default(),
-            _bytes: Default::default(),
         };
 
         data.process()?;

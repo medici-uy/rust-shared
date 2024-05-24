@@ -12,8 +12,6 @@ pub struct ExplanationData {
     pub date: DateTime<Utc>,
 
     pub hash: String,
-    #[serde(skip)]
-    pub _bytes: Vec<u8>,
 }
 
 impl ExplanationData {
@@ -23,7 +21,6 @@ impl ExplanationData {
             by,
             date,
             hash: Default::default(),
-            _bytes: Default::default(),
         };
 
         data.process()?;

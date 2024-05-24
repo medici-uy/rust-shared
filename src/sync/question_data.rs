@@ -32,8 +32,6 @@ pub struct QuestionData {
     pub question_options: Vec<QuestionOptionData>,
 
     pub hash: String,
-    #[serde(skip)]
-    pub _bytes: Vec<u8>,
 }
 
 impl QuestionData {
@@ -63,7 +61,6 @@ impl QuestionData {
             image_file_name,
             question_options,
             hash: Default::default(),
-            _bytes: Default::default(),
         };
 
         data.process()?;

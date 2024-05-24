@@ -17,8 +17,6 @@ pub struct BundleData {
     pub image_file_name: Option<PathBuf>,
 
     pub hash: String,
-    #[serde(skip)]
-    pub _bytes: Vec<u8>,
 }
 
 impl BundleData {
@@ -36,7 +34,6 @@ impl BundleData {
             discount,
             image_file_name,
             hash: Default::default(),
-            _bytes: Default::default(),
         };
 
         data.process()?;

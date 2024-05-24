@@ -6,18 +6,10 @@ use serde::Serialize;
 use uuid::Uuid;
 
 pub trait Hashable {
-    fn bytes(&self) -> Vec<u8> {
-        if let Some(stored_bytes) = self.stored_bytes() {
-            return stored_bytes.to_vec();
-        }
-
-        self.to_bytes()
-    }
-
     fn to_bytes(&self) -> Vec<u8>;
 
     fn hash(&self) -> String {
-        if let Some(hash) = self.stored_hash() {
+        if let Some(hash) = self.get_hash() {
             return hash.into();
         }
 
@@ -25,27 +17,18 @@ pub trait Hashable {
     }
 
     fn compute_hash(&self) -> String {
-        blake3::hash(&self.bytes()).to_string()
+        blake3::hash(&self.to_bytes()).to_string()
     }
 
-    fn refresh_hash(&mut self) -> bool {
-        self.store_bytes(self.to_bytes());
-        self.store_hash(self.compute_hash())
+    fn refresh_hash(&mut self) {
+        self.set_hash(self.compute_hash())
     }
 
-    fn store_hash(&mut self, _hash: String) -> bool {
-        false
+    fn set_hash(&mut self, _hash: String) {
+        panic!("cannot store hash in this type");
     }
 
-    fn store_bytes(&mut self, _bytes: Vec<u8>) -> bool {
-        false
-    }
-
-    fn stored_bytes(&self) -> Option<&[u8]> {
-        None
-    }
-
-    fn stored_hash(&self) -> Option<&str> {
+    fn get_hash(&self) -> Option<&str> {
         None
     }
 }
@@ -76,7 +59,7 @@ impl<T: Hashable> Hashable for Option<T> {
 
 impl<T: Hashable> Hashable for Vec<T> {
     fn to_bytes(&self) -> Vec<u8> {
-        self.iter().flat_map(|a| a.bytes()).collect()
+        self.iter().flat_map(|a| a.to_bytes()).collect()
     }
 }
 

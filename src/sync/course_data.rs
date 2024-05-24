@@ -33,8 +33,6 @@ pub struct CourseData {
     pub topics: Vec<String>,
 
     pub hash: String,
-    #[serde(skip)]
-    pub _bytes: Vec<u8>,
 }
 
 impl CourseData {
@@ -66,7 +64,6 @@ impl CourseData {
             questions,
             topics,
             hash: Default::default(),
-            _bytes: Default::default(),
         };
 
         data.process()?;

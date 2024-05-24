@@ -204,7 +204,6 @@ pub fn derive_redis_string(input: proc_macro::TokenStream) -> proc_macro::TokenS
 #[darling(attributes(medici))]
 struct HashableOpts {
     pub hash_field: Option<Ident>,
-    pub bytes_field: Option<Ident>,
 }
 
 #[proc_macro_derive(Hashable, attributes(medici))]
@@ -221,9 +220,6 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     let hash_field = opts
         .hash_field
         .unwrap_or(syn::parse_str::<Ident>("hash").unwrap());
-    let bytes_field = opts
-        .bytes_field
-        .unwrap_or(syn::parse_str::<Ident>("_bytes").unwrap());
 
     let name = derive_input.ident;
     let fields = filtered_struct_fields(derive_input.data, |field| {
@@ -231,7 +227,7 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
             return false;
         };
 
-        ident != &hash_field && ident != &bytes_field
+        ident != &hash_field
     });
 
     quote! {
@@ -241,18 +237,20 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
                 let mut bytes = ::std::vec![];
 
                 #(
-                    bytes.extend(::core::primitive::str::as_bytes(stringify!(self.#fields)));
-                    bytes.extend(Hashable::bytes(&self.#fields));
+                    ::std::iter::Extend::extend(
+                        &mut bytes,
+                        ::core::primitive::str::as_bytes(stringify!(self.#fields))
+                    );
+                    ::std::iter::Extend::extend(
+                        &mut bytes,
+                        Hashable::to_bytes(&self.#fields)
+                    );
                 )*
 
                 bytes
             }
 
-            fn stored_bytes(&self) -> ::core::option::Option<&[::std::primitive::u8]> {
-                ::core::option::Option::Some(&self.#bytes_field[..])
-            }
-
-            fn stored_hash(&self) -> ::core::option::Option<&::std::primitive::str> {
+            fn get_hash(&self) -> ::core::option::Option<&::std::primitive::str> {
                 if ::std::string::String::is_empty(&self.#hash_field) {
                     ::core::option::Option::None
                 } else {
@@ -260,16 +258,8 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
                 }
             }
 
-            fn store_hash(&mut self, hash: ::std::string::String) -> ::std::primitive::bool {
+            fn set_hash(&mut self, hash: ::std::string::String) {
                 self.#hash_field = hash;
-
-                true
-            }
-
-            fn store_bytes(&mut self, bytes: ::std::vec::Vec<::std::primitive::u8>) -> ::std::primitive::bool {
-                self.#bytes_field = bytes;
-
-                true
             }
         }
     }
