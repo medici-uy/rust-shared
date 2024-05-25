@@ -1,6 +1,7 @@
 use darling::FromDeriveInput;
+use proc_macro2::TokenTree;
 use quote::quote;
-use syn::{ext::IdentExt, parse_macro_input, Data, DeriveInput, Field, Fields, Ident, Type};
+use syn::{ext::IdentExt, parse_macro_input, Data, DeriveInput, Field, Fields, Ident, Meta, Type};
 
 #[derive(FromDeriveInput, Debug)]
 #[darling(attributes(medici))]
@@ -206,6 +207,8 @@ struct HashableOpts {
     pub hash_field: Option<Ident>,
 }
 
+const ATTRIBUTE_NAME: &'static str = "medici";
+
 #[proc_macro_derive(Hashable, attributes(medici))]
 pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -228,6 +231,23 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
         };
 
         ident != &hash_field
+            && !field.attrs.iter().any(|attr| {
+                let Meta::List(meta_list) = &attr.meta else {
+                    return false;
+                };
+
+                if !meta_list.path.is_ident(ATTRIBUTE_NAME) {
+                    return false;
+                }
+
+                meta_list.tokens.clone().into_iter().any(|token| {
+                    let TokenTree::Ident(ident) = token else {
+                        return false;
+                    };
+
+                    ident == "skip_hash"
+                })
+            })
     });
 
     quote! {

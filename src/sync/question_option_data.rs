@@ -98,7 +98,6 @@ mod tests {
         let question_id = Uuid::new_v4();
 
         let data_1 = QuestionOptionData::new(id, question_id, "opt 1".into(), false).unwrap();
-
         let data_2 = QuestionOptionData::new(id, question_id, "opt 2".into(), false).unwrap();
 
         assert_ne!(data_1.hash, data_2.hash);
