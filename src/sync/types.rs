@@ -1,4 +1,5 @@
 use std::collections::{HashMap, HashSet};
+use std::fmt::Display;
 use std::hash::Hash;
 
 use serde::{Deserialize, Serialize};
@@ -17,6 +18,20 @@ pub struct SyncData {
     pub question_sources: QuestionSourcesSyncData,
     pub bundles: BundlesSyncData,
     pub avatar_file_names: HashSet<String>,
+}
+
+impl Display for SyncData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f,
+            "Courses: {}\nQuestions: {}\nQuestion options: {}\nQuestion topics: {}\nQuestion sources: {}\nBundles: {}",
+            self.courses,
+            self.questions,
+            self.question_options,
+            self.question_topics,
+            self.question_sources,
+            self.bundles
+        )
+    }
 }
 
 pub type CoursesSyncData = ElementSyncData<CourseData, String>;
@@ -38,6 +53,17 @@ impl<T: Eq + Hash, K: Eq + Hash> Default for ElementSyncData<T, K> {
             for_sync: Default::default(),
             for_deletion: Default::default(),
         }
+    }
+}
+
+impl<T: Eq + Hash, K: Eq + Hash> Display for ElementSyncData<T, K> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "(sync: {}; delete: {})",
+            self.for_sync.len(),
+            self.for_deletion.len()
+        )
     }
 }
 
