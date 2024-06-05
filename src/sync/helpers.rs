@@ -11,6 +11,7 @@ static WHITESPACE_BEFORE_END_REGEX: Lazy<Regex> =
 static DOUBLE_QUOTE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"[“”]").unwrap());
 static SPACE_BEFORE_PERCENT_SIGN_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(&format!(r"(\d)({})", UNITS_TO_SEPARATE.join("|"))).unwrap());
+static END_PERIOD_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\.$").unwrap());
 
 pub fn format_text(text: &str) -> String {
     let mut formatted = text.trim().to_owned();
@@ -23,6 +24,10 @@ pub fn format_text(text: &str) -> String {
         .into();
 
     formatted
+}
+
+pub fn remove_end_period(text: &str) -> String {
+    END_PERIOD_REGEX.replace(text, "").into()
 }
 
 pub fn full_image_path<P>(key: &str, image_file_name: P) -> String

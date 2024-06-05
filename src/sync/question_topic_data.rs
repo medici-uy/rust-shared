@@ -1,6 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
+use super::helpers::{format_text, remove_end_period};
 use crate::traits::Hashable;
 
 #[non_exhaustive]
@@ -35,7 +36,7 @@ impl QuestionTopicData {
     }
 
     fn format(&mut self) {
-        self.name = self.name.trim().into();
+        self.name = remove_end_period(&format_text(&self.name));
     }
 
     pub fn is_default_topic_name(name: &str) -> bool {
@@ -46,5 +47,17 @@ impl QuestionTopicData {
 impl Hashable for QuestionTopicData {
     fn to_bytes(&self) -> Vec<u8> {
         self.key().to_bytes()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format() {
+        let data = QuestionTopicData::new("test".into(), "topic  1.".into()).unwrap();
+
+        assert_eq!(data.name, "topic 1");
     }
 }
