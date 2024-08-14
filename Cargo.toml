@@ -17,7 +17,6 @@ chrono = { version = "0.4.38", default-features = false, features = [
     "clock",
 ] }
 medici-macros = { path = "macros" }
-once_cell = "1.19.0"
 regex = "1.10.6"
 rust_decimal = "1.35.0"
 serde = { version = "1.0.207", features = ["derive"] }

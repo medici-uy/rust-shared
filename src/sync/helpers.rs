@@ -1,17 +1,17 @@
 use std::path::Path;
+use std::sync::LazyLock;
 
-use once_cell::sync::Lazy;
 use regex::Regex;
 
 const UNITS_TO_SEPARATE: [&str; 1] = ["%"];
 
-static WHITESPACE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s\s+").unwrap());
-static WHITESPACE_BEFORE_END_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"\s(\.|:|\?)$").unwrap());
-static DOUBLE_QUOTE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"[“”]").unwrap());
-static SPACE_BEFORE_PERCENT_SIGN_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(&format!(r"(\d)({})", UNITS_TO_SEPARATE.join("|"))).unwrap());
-static END_PERIOD_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\.$").unwrap());
+static WHITESPACE_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s\s+").unwrap());
+static WHITESPACE_BEFORE_END_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\s(\.|:|\?)$").unwrap());
+static DOUBLE_QUOTE_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[“”]").unwrap());
+static SPACE_BEFORE_PERCENT_SIGN_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(&format!(r"(\d)({})", UNITS_TO_SEPARATE.join("|"))).unwrap());
+static END_PERIOD_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\.$").unwrap());
 
 pub fn format_text(text: &str) -> String {
     let mut formatted = text.trim().to_owned();
