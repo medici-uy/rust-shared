@@ -258,4 +258,36 @@ mod tests {
 
         assert!(result.is_err());
     }
+
+    #[test]
+    fn test_blank_option() {
+        let course_key = "course".to_string();
+        let question_id = Uuid::new_v4();
+
+        let question_data = QuestionData::new(
+            question_id,
+            course_key.clone(),
+            "text".into(),
+            None,
+            "topic".into(),
+            None,
+            vec![],
+            None,
+            vec![
+                QuestionOptionData::new(Uuid::new_v4(), question_id, "opt1".into(), true).unwrap(),
+                QuestionOptionData::new(Uuid::new_v4(), question_id, "opt2".into(), false).unwrap(),
+                QuestionOptionData::new(Uuid::new_v4(), question_id, "".into(), false).unwrap(),
+            ],
+            QuestionSourceData::new(
+                course_key.clone(),
+                QuestionSourceType::SelfAssessment,
+                None,
+                None,
+            )
+            .unwrap(),
+        )
+        .unwrap();
+
+        assert_eq!(question_data.question_options.len(), 2);
+    }
 }

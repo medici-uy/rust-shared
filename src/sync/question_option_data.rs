@@ -61,7 +61,10 @@ impl QuestionOptionData {
 
     fn format(&mut self) {
         self.text = format_text(&self.text);
-        self.ensure_text_ends_with_period();
+
+        if !self.text.is_empty() {
+            self.ensure_text_ends_with_period();
+        }
     }
 
     fn ensure_text_ends_with_period(&mut self) {
