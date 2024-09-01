@@ -9,8 +9,8 @@ rust-version = "1.80"
 
 [dependencies]
 anyhow = "1.0.86"
-aws-sdk-sesv2 = "1.40.0"
-blake3 = "1.5.3"
+aws-sdk-sesv2 = "1.43.0"
+blake3 = "1.5.4"
 chrono = { version = "0.4.38", default-features = false, features = [
     "std",
     "serde",
@@ -18,16 +18,16 @@ chrono = { version = "0.4.38", default-features = false, features = [
 ] }
 medici-macros = { path = "macros" }
 regex = "1.10.6"
-rust_decimal = "1.35.0"
-serde = { version = "1.0.207", features = ["derive"] }
-serde_json = "1.0.124"
-sqlx = { version = "0.8.0", default-features = false, features = [
+rust_decimal = "1.36.0"
+serde = { version = "1.0.209", features = ["derive"] }
+serde_json = "1.0.127"
+sqlx = { version = "0.8.1", default-features = false, features = [
     "runtime-tokio",
     "postgres",
     "macros",
     "derive",
 ] }
 strum = { version = "0.26.3", features = ["derive"] }
-tokio = { version = "1.39.2", features = ["full"] }
+tokio = { version = "1.40.0", features = ["full"] }
 tracing = "0.1.40"
 uuid = { version = "1.10.0", features = ["std", "v4", "serde"] }
