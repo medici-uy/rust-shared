@@ -147,13 +147,12 @@ impl CourseData {
         )
     }
 
-    pub fn questions_with_invalid_topics(&self) -> Vec<QuestionData> {
+    pub fn questions_with_invalid_topics(&self) -> Vec<&QuestionData> {
         self.questions
             .iter()
             .filter(|question| {
                 !question.topic.is_blank() && !self.valid_topics.contains(&question.topic.name)
             })
-            .cloned()
             .collect()
     }
 }
