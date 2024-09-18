@@ -28,7 +28,7 @@ pub struct CourseData {
     #[serde(skip)]
     pub questions: Vec<QuestionData>,
     #[serde(skip)]
-    pub topics: Vec<String>,
+    pub valid_topics: Vec<String>,
 
     pub hash: String,
 }
@@ -58,7 +58,7 @@ impl CourseData {
             year,
             order,
             questions,
-            topics,
+            valid_topics: topics,
             hash: Default::default(),
         };
 
@@ -145,5 +145,15 @@ impl CourseData {
                 .iter()
                 .map(|question| question.source.clone()),
         )
+    }
+
+    pub fn questions_with_invalid_topics(&self) -> Vec<QuestionData> {
+        self.questions
+            .iter()
+            .filter(|question| {
+                !question.topic.is_blank() && !self.valid_topics.contains(&question.topic.name)
+            })
+            .cloned()
+            .collect()
     }
 }
