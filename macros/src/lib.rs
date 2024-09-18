@@ -155,45 +155,23 @@ fn parse_table_struct(table_struct: String) -> Type {
 pub fn derive_redis_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
     let name = derive_input.ident;
-    let stringified_name = stringify!(name);
 
     let expanded = quote! {
         #[automatically_derived]
-        impl fred::types::FromRedis for #name {
+        impl ::fred::types::FromRedis for #name {
             fn from_value(
-                value: fred::types::RedisValue
-            ) -> ::std::result::Result<Self, fred::error::RedisError> {
-                match value {
-                    fred::types::RedisValue::String(string) => {
-                        serde_json::from_str(&string).map_err(|_| {
-                            fred::error::RedisError::new(
-                                fred::error::RedisErrorKind::Parse,
-                                format!("invalid {} value stored in Redis", #stringified_name),
-                            )
-                        })
-                    }
-                    _ => ::std::result::Result::Err(fred::error::RedisError::new(
-                        fred::error::RedisErrorKind::Parse,
-                        format!("invalid Redis value type for {}", #stringified_name),
-                    )),
-                }
+                value: ::fred::types::RedisValue
+            ) -> ::std::result::Result<Self, ::fred::error::RedisError> {
+                let json_value = value.into_json().unwrap();
+
+                ::std::result::Result::Ok(::serde_json::from_value(json_value).unwrap())
             }
         }
 
         #[automatically_derived]
-        impl std::convert::TryFrom<#name> for fred::types::RedisValue {
-            type Error = fred::error::RedisError;
-
-            fn try_from(value: #name) -> std::result::Result<Self, Self::Error> {
-                match serde_json::to_string(&value) {
-                    ::std::result::Result::Ok(string) =>
-                        ::std::result::Result::Ok(Self::from(&string)),
-                    ::std::result::Result::Err(_) =>
-                        ::std::result::Result::Err(fred::error::RedisError::new(
-                            fred::error::RedisErrorKind::Unknown,
-                            format!("error stringifying {}", #stringified_name),
-                        )),
-                }
+        impl ::std::convert::From<#name> for ::fred::types::RedisValue {
+            fn from(value: #name) -> Self {
+                ::serde_json::to_string(&value).unwrap().into()
             }
         }
     };
