@@ -151,7 +151,7 @@ impl CourseData {
         self.questions
             .iter()
             .filter(|question| {
-                !question.topic.is_blank() && !self.valid_topics.contains(&question.topic.name)
+                !question.topic.is_default() && !self.valid_topics.contains(&question.topic.name)
             })
             .collect()
     }
