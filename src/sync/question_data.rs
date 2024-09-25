@@ -274,9 +274,11 @@ mod tests {
             vec![],
             None,
             vec![
-                QuestionOptionData::new(Uuid::new_v4(), question_id, "opt1".into(), true).unwrap(),
-                QuestionOptionData::new(Uuid::new_v4(), question_id, "opt2".into(), false).unwrap(),
-                QuestionOptionData::new(Uuid::new_v4(), question_id, "".into(), false).unwrap(),
+                QuestionOptionData::new(Uuid::new_v4(), question_id, "opt1".into(), true, 0)
+                    .unwrap(),
+                QuestionOptionData::new(Uuid::new_v4(), question_id, "opt2".into(), false, 1)
+                    .unwrap(),
+                QuestionOptionData::new(Uuid::new_v4(), question_id, "".into(), false, 2).unwrap(),
             ],
             QuestionSourceData::new(
                 course_key.clone(),

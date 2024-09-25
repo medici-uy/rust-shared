@@ -13,18 +13,26 @@ pub struct QuestionOptionData {
     pub question_id: Uuid,
     pub text: String,
     pub correct: bool,
+    pub reference: u16,
 
     pub hash: String,
 }
 
 impl QuestionOptionData {
-    pub fn new(id: Uuid, question_id: Uuid, text: String, correct: bool) -> Result<Self> {
+    pub fn new(
+        id: Uuid,
+        question_id: Uuid,
+        text: String,
+        correct: bool,
+        reference: u16,
+    ) -> Result<Self> {
         let mut data = Self {
             id,
             question_id,
             text,
             correct,
             hash: Default::default(),
+            reference,
         };
 
         data.process()?;
@@ -88,9 +96,14 @@ mod tests {
 
     #[test]
     fn test_format() {
-        let data =
-            QuestionOptionData::new(Uuid::new_v4(), Uuid::new_v4(), "  option  1 ".into(), true)
-                .unwrap();
+        let data = QuestionOptionData::new(
+            Uuid::new_v4(),
+            Uuid::new_v4(),
+            "  option  1 ".into(),
+            true,
+            0,
+        )
+        .unwrap();
 
         assert_eq!(data.text, "option 1.");
     }
@@ -100,8 +113,8 @@ mod tests {
         let id = Uuid::new_v4();
         let question_id = Uuid::new_v4();
 
-        let data_1 = QuestionOptionData::new(id, question_id, "opt 1".into(), false).unwrap();
-        let data_2 = QuestionOptionData::new(id, question_id, "opt 2".into(), false).unwrap();
+        let data_1 = QuestionOptionData::new(id, question_id, "opt 1".into(), false, 0).unwrap();
+        let data_2 = QuestionOptionData::new(id, question_id, "opt 2".into(), false, 0).unwrap();
 
         assert_ne!(data_1.hash, data_2.hash);
     }
