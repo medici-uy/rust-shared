@@ -79,6 +79,11 @@ impl QuestionData {
         self.deduplicate();
         self.check()?;
 
+        // We refresh the options' hashes because when we sort them, we change their references.
+        for question_option in &mut self.question_options {
+            question_option.refresh_hash();
+        }
+
         self.refresh_hash();
 
         Ok(())
