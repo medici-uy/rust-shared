@@ -13,6 +13,7 @@ pub struct QuestionOptionData {
     pub question_id: Uuid,
     pub text: String,
     pub correct: bool,
+    #[medici(skip_hash)]
     pub reference: u16,
 
     pub hash: String,
@@ -43,6 +44,8 @@ impl QuestionOptionData {
     pub fn process(&mut self) -> Result<()> {
         self.format();
         self.check()?;
+
+        self.refresh_hash();
 
         Ok(())
     }
@@ -111,13 +114,9 @@ mod tests {
         let id = Uuid::new_v4();
         let question_id = Uuid::new_v4();
 
-        let mut data_1 =
-            QuestionOptionData::new(id, question_id, "opt 1".into(), false, 0).unwrap();
-        data_1.refresh_hash();
+        let data_1 = QuestionOptionData::new(id, question_id, "opt 1".into(), false, 0).unwrap();
 
-        let mut data_2 =
-            QuestionOptionData::new(id, question_id, "opt 2".into(), false, 0).unwrap();
-        data_2.refresh_hash();
+        let data_2 = QuestionOptionData::new(id, question_id, "opt 2".into(), false, 0).unwrap();
 
         assert_ne!(data_1.hash, data_2.hash);
     }
