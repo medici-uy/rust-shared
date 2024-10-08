@@ -11,6 +11,7 @@ pub struct QuestionSourceData {
     pub r#type: QuestionSourceType,
     pub name: Option<String>,
     pub date: Option<NaiveDate>,
+    pub variant: Option<String>,
 }
 
 impl QuestionSourceData {
@@ -22,12 +23,14 @@ impl QuestionSourceData {
         r#type: QuestionSourceType,
         name: Option<String>,
         date: Option<NaiveDate>,
+        variant: Option<String>,
     ) -> Result<Self> {
         let mut data = Self {
             course_key,
             r#type,
             name,
             date,
+            variant,
         };
 
         data.format();
@@ -38,7 +41,7 @@ impl QuestionSourceData {
 
     pub fn key(&self) -> String {
         format!(
-            "{}{}{}{}{}{}{}",
+            "{}{}{}{}{}{}{}{}{}",
             self.course_key,
             Self::KEY_SEPARATOR,
             self.r#type,
@@ -47,7 +50,11 @@ impl QuestionSourceData {
             Self::KEY_SEPARATOR,
             self.date
                 .map(|date| date.to_string())
-                .unwrap_or(Self::EMPTY_FIELD_KEY_VALUE.into())
+                .unwrap_or(Self::EMPTY_FIELD_KEY_VALUE.into()),
+            Self::KEY_SEPARATOR,
+            self.variant
+                .as_deref()
+                .unwrap_or(Self::EMPTY_FIELD_KEY_VALUE)
         )
     }
 

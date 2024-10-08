@@ -255,6 +255,7 @@ mod tests {
                 QuestionSourceType::SelfAssessment,
                 None,
                 None,
+                None,
             )
             .unwrap(),
         );
@@ -286,6 +287,7 @@ mod tests {
             QuestionSourceData::new(
                 course_key.clone(),
                 QuestionSourceType::SelfAssessment,
+                None,
                 None,
                 None,
             )
