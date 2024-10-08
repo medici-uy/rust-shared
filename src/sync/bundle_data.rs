@@ -15,7 +15,7 @@ pub struct BundleData {
     pub description: String,
     pub course_keys: Vec<String>,
     pub discount: Decimal,
-    pub image_file_name: Option<PathBuf>,
+    pub image_file_name: PathBuf,
 
     pub hash: String,
 }
@@ -27,7 +27,7 @@ impl BundleData {
         description: String,
         course_keys: Vec<String>,
         discount: Decimal,
-        image_file_name: Option<PathBuf>,
+        image_file_name: PathBuf,
     ) -> Result<Self> {
         let mut data = Self {
             key,
@@ -71,10 +71,7 @@ impl BundleData {
         self.description = self.description.trim().to_string();
     }
 
-    pub fn full_image_path(&self) -> Option<String> {
-        Some(full_image_path(
-            BUNDLE_IMAGES_DIR_NAME,
-            self.image_file_name.as_ref()?,
-        ))
+    pub fn full_image_path(&self) -> String {
+        full_image_path(BUNDLE_IMAGES_DIR_NAME, &self.image_file_name)
     }
 }

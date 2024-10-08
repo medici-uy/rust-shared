@@ -22,7 +22,7 @@ pub struct CourseData {
     pub description: Option<String>,
     pub price_in_uyu: Option<Decimal>,
     pub tags: Vec<String>,
-    pub image_file_name: Option<PathBuf>,
+    pub image_file_name: PathBuf,
     pub year: Option<u16>,
     pub order: Option<u16>,
     #[serde(skip)]
@@ -41,7 +41,7 @@ impl CourseData {
         description: Option<String>,
         price_in_uyu: Option<Decimal>,
         tags: Vec<String>,
-        image_file_name: Option<PathBuf>,
+        image_file_name: PathBuf,
         year: Option<u16>,
         order: Option<u16>,
         questions: Vec<QuestionData>,
@@ -131,8 +131,8 @@ impl CourseData {
         self.tags = self.tags.iter().map(|tag| tag.trim().into()).collect();
     }
 
-    pub fn full_image_path(&self) -> Option<String> {
-        Some(full_image_path(&self.key, self.image_file_name.as_ref()?))
+    pub fn full_image_path(&self) -> String {
+        full_image_path(&self.key, &self.image_file_name)
     }
 
     pub fn question_topics(&self) -> HashSet<QuestionTopicData> {
