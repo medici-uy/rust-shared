@@ -1,11 +1,14 @@
 use anyhow::{bail, Result};
 use chrono::NaiveDate;
+#[cfg(test)]
+use fake::{Dummy, Fake, Faker};
 use serde::{Deserialize, Serialize};
 
 use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, PartialEq, Hash, Eq, Clone, Debug)]
+#[cfg_attr(test, derive(Dummy))]
 pub struct QuestionSourceData {
     pub course_key: String,
     pub r#type: QuestionSourceType,
@@ -33,8 +36,7 @@ impl QuestionSourceData {
             variant,
         };
 
-        data.format();
-        data.check()?;
+        data.process()?;
 
         Ok(data)
     }
@@ -56,6 +58,13 @@ impl QuestionSourceData {
                 .as_deref()
                 .unwrap_or(Self::EMPTY_FIELD_KEY_VALUE)
         )
+    }
+
+    fn process(&mut self) -> Result<()> {
+        self.format();
+        self.check()?;
+
+        Ok(())
     }
 
     fn check(&self) -> Result<()> {
@@ -96,6 +105,7 @@ impl Hashable for QuestionSourceData {
     Clone,
     Debug,
 )]
+#[cfg_attr(test, derive(Dummy))]
 #[sqlx(type_name = "text", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
@@ -104,4 +114,18 @@ pub enum QuestionSourceType {
     Partial,
     SelfAssessment,
     Other,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_process() {
+        let mut data: QuestionSourceData = Faker.fake();
+        data.r#type = QuestionSourceType::Exam;
+        data.date = None;
+
+        assert!(data.process().is_err());
+    }
 }

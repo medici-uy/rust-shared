@@ -31,3 +31,13 @@ strum = { version = "0.26.3", features = ["derive"] }
 tokio = { version = "1.40.0", features = ["full"] }
 tracing = "0.1.40"
 uuid = { version = "1.10.0", features = ["std", "v4", "serde"] }
+
+[dev-dependencies]
+fake = { version = "2.10.0", features = [
+    "derive",
+    "rust_decimal",
+    "uuid",
+    "chrono",
+] }
+proptest = "1.5.0"
+rand = "0.8.5"

@@ -1,11 +1,17 @@
 use anyhow::Result;
+#[cfg(test)]
+use fake::{Dummy, Fake, Faker};
 use serde::{Deserialize, Serialize};
 
-use super::helpers::{format_text, remove_end_period};
+use super::{
+    capitalize_first_char,
+    helpers::{format_text, remove_end_period},
+};
 use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, PartialEq, Hash, Eq, Clone, Debug)]
+#[cfg_attr(test, derive(Dummy))]
 pub struct QuestionTopicData {
     pub course_key: String,
     pub name: String,
@@ -37,6 +43,8 @@ impl QuestionTopicData {
 
     fn format(&mut self) {
         self.name = remove_end_period(&format_text(&self.name));
+
+        capitalize_first_char(&mut self.name);
     }
 
     pub fn is_default_topic_name(name: &str) -> bool {
@@ -56,8 +64,10 @@ mod tests {
 
     #[test]
     fn test_format() {
-        let data = QuestionTopicData::new("test".into(), "topic  1.".into()).unwrap();
+        let mut data: QuestionTopicData = Faker.fake();
+        data.name = " topic 1. ".into();
+        data.format();
 
-        assert_eq!(data.name, "topic 1");
+        assert_eq!(data.name, "Topic 1");
     }
 }

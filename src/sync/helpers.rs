@@ -30,6 +30,12 @@ pub fn remove_end_period(text: &str) -> String {
     END_PERIOD_REGEX.replace(text, "").into()
 }
 
+pub fn capitalize_first_char(text: &mut str) {
+    if let Some(char) = text.get_mut(0..1) {
+        char.make_ascii_uppercase();
+    }
+}
+
 pub fn full_image_path<P>(key: &str, image_file_name: P) -> String
 where
     P: AsRef<Path>,
@@ -51,7 +57,7 @@ mod tests {
     #[test]
     fn test_format_text() {
         assert_eq!(
-            format_text(" test  “text” 12.34% . "),
+            format_text(" test  “text”   12.34%  . "),
             "test \"text\" 12.34 %."
         );
     }

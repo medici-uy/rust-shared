@@ -4,6 +4,8 @@ use std::path::PathBuf;
 
 use anyhow::{bail, Result};
 use chrono::Utc;
+#[cfg(test)]
+use fake::{Dummy, Fake, Faker};
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 use uuid::Uuid;
@@ -17,6 +19,7 @@ use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(medici_macros::Hashable, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
+#[cfg_attr(test, derive(Dummy))]
 pub struct QuestionData {
     pub id: Uuid,
 
@@ -29,6 +32,7 @@ pub struct QuestionData {
     pub tags: Vec<String>,
     pub image_file_name: Option<PathBuf>,
     #[serde(skip)]
+    #[cfg_attr(test, dummy(faker = "(Faker, 2..=5)"))]
     pub question_options: Vec<QuestionOptionData>,
 
     pub hash: String,
@@ -137,20 +141,15 @@ impl QuestionData {
     }
 
     fn check_duplicates_in_question_options(&self) -> Result<()> {
-        let texts_iter = self
+        let texts_set = self
             .question_options
             .iter()
-            .map(|question_option| question_option.text.as_str());
+            .map(|question_option| question_option.text.as_str())
+            .collect::<HashSet<&str>>();
 
-        let mut texts_set = HashSet::<&str>::with_capacity(self.question_options.len());
-
-        for text in texts_iter {
-            if texts_set.contains(text) {
-                debug!(question = ?self);
-                bail!("duplicate question option");
-            } else {
-                texts_set.insert(text);
-            }
+        if texts_set.len() != self.question_options.len() {
+            debug!(question = ?self);
+            bail!("duplicate question option");
         }
 
         Ok(())
@@ -206,6 +205,21 @@ impl QuestionData {
         self.process()
     }
 
+    #[cfg(test)]
+    pub fn prepare_for_test(&mut self) -> Result<()> {
+        for (index, question_option) in self.question_options.iter_mut().enumerate() {
+            question_option.question_id = self.id;
+
+            if index == 0 {
+                question_option.correct = true;
+            }
+
+            question_option.process()?;
+        }
+
+        self.process()
+    }
+
     pub fn full_image_path(&self) -> Option<String> {
         Some(full_image_path(
             &self.course_key,
@@ -232,69 +246,50 @@ impl std::fmt::Display for QuestionData {
 
 #[cfg(test)]
 mod tests {
-    use crate::sync::QuestionSourceType;
+    use proptest::prelude::*;
 
     use super::*;
 
     #[test]
-    fn test_check() {
-        let course_key = "course".to_string();
+    fn test_process() {
+        let mut data: QuestionData = Faker.fake();
+        data.prepare_for_test().unwrap();
+    }
 
-        let result = QuestionData::new(
-            Uuid::new_v4(),
-            course_key.clone(),
-            "text".into(),
-            None,
-            "topic".into(),
-            None,
-            vec![],
-            None,
-            vec![],
-            QuestionSourceData::new(
-                course_key.clone(),
-                QuestionSourceType::SelfAssessment,
-                None,
-                None,
-                None,
-            )
-            .unwrap(),
-        );
+    proptest! {
+        #[test]
+        fn test_deduplicate(text in "[a-zA-Z0-9_]+", size in 3..=5usize) {
+            let mut data: QuestionData = Faker.fake();
+            data.question_options = fake::vec![_; size];
 
-        assert!(result.is_err());
+            for (index, question_option) in data.question_options.iter_mut().enumerate() {
+                if index != 0 {
+                    question_option.text = text.clone();
+                }
+            }
+
+            data.prepare_for_test().unwrap();
+
+            prop_assert_eq!(
+                data.question_options.len(),
+                2
+            );
+        }
     }
 
     #[test]
     fn test_blank_option() {
-        let course_key = "course".to_string();
-        let question_id = Uuid::new_v4();
+        let mut data: QuestionData = Faker.fake();
+        const ORIGINAL_QUESTION_OPTION_COUNT: usize = 3;
+        data.question_options = fake::vec![_; ORIGINAL_QUESTION_OPTION_COUNT];
 
-        let question_data = QuestionData::new(
-            question_id,
-            course_key.clone(),
-            "text".into(),
-            None,
-            "topic".into(),
-            None,
-            vec![],
-            None,
-            vec![
-                QuestionOptionData::new(Uuid::new_v4(), question_id, "opt1".into(), true, 0)
-                    .unwrap(),
-                QuestionOptionData::new(Uuid::new_v4(), question_id, "opt2".into(), false, 1)
-                    .unwrap(),
-                QuestionOptionData::new(Uuid::new_v4(), question_id, "".into(), false, 2).unwrap(),
-            ],
-            QuestionSourceData::new(
-                course_key.clone(),
-                QuestionSourceType::SelfAssessment,
-                None,
-                None,
-                None,
-            )
-            .unwrap(),
-        )
-        .unwrap();
+        data.prepare_for_test().unwrap();
+        data.question_options.last_mut().unwrap().text = "".into();
+        data.process().unwrap();
 
-        assert_eq!(question_data.question_options.len(), 2);
+        assert_eq!(
+            data.question_options.len(),
+            ORIGINAL_QUESTION_OPTION_COUNT - 1
+        );
     }
 }

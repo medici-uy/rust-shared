@@ -1,4 +1,6 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
+#[cfg(test)]
+use fake::{Dummy, Fake, Faker};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -7,11 +9,13 @@ use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(medici_macros::Hashable, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
+#[cfg_attr(test, derive(Dummy))]
 pub struct QuestionOptionData {
     pub id: Uuid,
 
     pub question_id: Uuid,
     pub text: String,
+    #[cfg_attr(test, dummy(default))]
     pub correct: bool,
     #[medici(skip_hash)]
     pub reference: u16,
@@ -61,10 +65,6 @@ impl QuestionOptionData {
     }
 
     fn check(&self) -> Result<()> {
-        if self.id == self.question_id {
-            bail!("invalid question option with ID {}", self.id);
-        }
-
         Ok(())
     }
 
@@ -96,28 +96,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_format() {
-        let data = QuestionOptionData::new(
-            Uuid::new_v4(),
-            Uuid::new_v4(),
-            "  option  1 ".into(),
-            true,
-            0,
-        )
-        .unwrap();
+    fn test_process() {
+        let mut data: QuestionOptionData = Faker.fake();
+        data.text = "  option  1  ".into();
+        data.process().unwrap();
 
         assert_eq!(data.text, "option 1.");
     }
 
     #[test]
     fn test_hash() {
-        let id = Uuid::new_v4();
-        let question_id = Uuid::new_v4();
+        let mut data1: QuestionOptionData = Faker.fake();
+        data1.process().unwrap();
 
-        let data_1 = QuestionOptionData::new(id, question_id, "opt 1".into(), false, 0).unwrap();
+        let mut data2: QuestionOptionData = Faker.fake();
+        data2.process().unwrap();
 
-        let data_2 = QuestionOptionData::new(id, question_id, "opt 2".into(), false, 0).unwrap();
-
-        assert_ne!(data_1.hash, data_2.hash);
+        assert_ne!(data1.hash, data2.hash);
     }
 }
