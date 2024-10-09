@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 
 use anyhow::{bail, Result};
+#[cfg(test)]
+use fake::{Dummy, Fake, Faker};
 use rust_decimal::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -14,12 +16,14 @@ use crate::traits::Hashable;
 
 #[non_exhaustive]
 #[derive(medici_macros::Hashable, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Debug)]
+#[cfg_attr(test, derive(Dummy))]
 pub struct CourseData {
     pub key: String,
 
     pub name: String,
     pub short_name: String,
     pub description: Option<String>,
+    #[cfg_attr(test, dummy(default))]
     pub price_in_uyu: Option<Decimal>,
     pub tags: Vec<String>,
     pub image_file_name: PathBuf,
@@ -118,6 +122,12 @@ impl CourseData {
             bail!("invalid course with key {}", self.key);
         }
 
+        if let Some(price_in_uyu) = self.price_in_uyu {
+            if price_in_uyu <= Decimal::ZERO {
+                bail!("invalid course price");
+            }
+        }
+
         Ok(())
     }
 
@@ -154,5 +164,17 @@ impl CourseData {
                 !question.topic.is_default() && !self.valid_topics.contains(&question.topic.name)
             })
             .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_process() {
+        let mut data: CourseData = Faker.fake();
+
+        data.process().unwrap();
     }
 }
