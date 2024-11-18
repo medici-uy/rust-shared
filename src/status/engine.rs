@@ -19,6 +19,7 @@ impl EngineStatus {
 #[derive(Deserialize, Serialize, Default, Clone, Debug)]
 pub struct DbStatus {
     pub healthy: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
     pub active_connections: usize,
     pub idle_connections: usize,
@@ -29,6 +30,7 @@ pub struct DbStatus {
 #[derive(Deserialize, Serialize, Default, Clone, Debug)]
 pub struct CacheStatus {
     pub healthy: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
     pub pool_size: usize,
 }
