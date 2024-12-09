@@ -4,7 +4,7 @@ use fake::{Dummy, Fake, Faker};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::helpers::format_text;
+use super::{capitalize_first_char, helpers::format_text};
 use crate::traits::Hashable;
 
 #[non_exhaustive]
@@ -19,6 +19,9 @@ pub struct QuestionOptionData {
     pub correct: bool,
     #[medici(skip_hash)]
     pub reference: u16,
+    #[medici(skip_hash)]
+    #[cfg_attr(test, dummy(default))]
+    pub preserve_case: bool,
 
     pub hash: String,
 }
@@ -30,6 +33,7 @@ impl QuestionOptionData {
         text: String,
         correct: bool,
         reference: u16,
+        preserve_case: bool,
     ) -> Result<Self> {
         let mut data = Self {
             id,
@@ -38,6 +42,7 @@ impl QuestionOptionData {
             correct,
             hash: Default::default(),
             reference,
+            preserve_case,
         };
 
         data.process()?;
@@ -74,6 +79,10 @@ impl QuestionOptionData {
         if !self.text.is_empty() {
             self.ensure_text_ends_with_period();
         }
+
+        if !self.preserve_case {
+            capitalize_first_char(&mut self.text);
+        }
     }
 
     fn ensure_text_ends_with_period(&mut self) {
@@ -101,7 +110,17 @@ mod tests {
         data.text = "  option  1  ".into();
         data.process().unwrap();
 
-        assert_eq!(data.text, "option 1.");
+        assert_eq!(data.text, "Option 1.");
+    }
+
+    #[test]
+    fn test_process_preserve_case() {
+        let mut data: QuestionOptionData = Faker.fake();
+        data.text = "o".into();
+        data.preserve_case = true;
+        data.process().unwrap();
+
+        assert_eq!(data.text, "o.");
     }
 
     #[test]
