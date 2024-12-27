@@ -151,17 +151,17 @@ fn parse_table_struct(table_struct: String) -> Type {
     syn::parse_str::<syn::Type>(&table_struct).unwrap()
 }
 
-#[proc_macro_derive(RedisString, attributes(medici))]
-pub fn derive_redis_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+#[proc_macro_derive(ValkeyString, attributes(medici))]
+pub fn derive_valkey_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
     let name = derive_input.ident;
 
     let expanded = quote! {
         #[automatically_derived]
-        impl ::fred::types::FromRedis for #name {
+        impl ::fred::types::FromValue for #name {
             fn from_value(
-                value: ::fred::types::RedisValue
-            ) -> ::std::result::Result<Self, ::fred::error::RedisError> {
+                value: ::fred::types::Value
+            ) -> ::std::result::Result<Self, ::fred::error::Error> {
                 let json_value = value.into_json().unwrap();
 
                 ::std::result::Result::Ok(::serde_json::from_value(json_value).unwrap())
@@ -169,7 +169,7 @@ pub fn derive_redis_string(input: proc_macro::TokenStream) -> proc_macro::TokenS
         }
 
         #[automatically_derived]
-        impl ::std::convert::From<#name> for ::fred::types::RedisValue {
+        impl ::std::convert::From<#name> for ::fred::types::Value {
             fn from(value: #name) -> Self {
                 ::serde_json::to_string(&value).unwrap().into()
             }
