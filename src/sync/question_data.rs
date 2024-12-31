@@ -90,9 +90,9 @@ impl QuestionData {
 
     fn sort(&mut self) {
         self.question_options.sort_by(|a, b| {
-            if a.correct {
+            if a.is_correct {
                 Ordering::Less
-            } else if b.correct {
+            } else if b.is_correct {
                 Ordering::Greater
             } else {
                 a.text.cmp(&b.text)
@@ -159,7 +159,7 @@ impl QuestionData {
         let correct_count = self
             .question_options
             .iter()
-            .filter(|option| option.correct)
+            .filter(|option| option.is_correct)
             .count();
 
         if !self.is_blank() && correct_count != 1 {
@@ -211,7 +211,7 @@ impl QuestionData {
             question_option.question_id = self.id;
 
             if index == 0 {
-                question_option.correct = true;
+                question_option.is_correct = true;
             }
 
             question_option.process()?;

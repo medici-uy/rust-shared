@@ -16,7 +16,7 @@ pub struct QuestionOptionData {
     pub question_id: Uuid,
     pub text: String,
     #[cfg_attr(test, dummy(default))]
-    pub correct: bool,
+    pub is_correct: bool,
     #[medici(skip_hash)]
     pub reference: u16,
     #[medici(skip_hash)]
@@ -39,7 +39,7 @@ impl QuestionOptionData {
             id,
             question_id,
             text,
-            correct,
+            is_correct: correct,
             hash: Default::default(),
             reference,
             preserve_case,
@@ -66,7 +66,7 @@ impl QuestionOptionData {
     pub fn eq_data(&self, other: &Self) -> bool {
         self.question_id == other.question_id
             && self.text == other.text
-            && self.correct == other.correct
+            && self.is_correct == other.is_correct
     }
 
     fn check(&self) -> Result<()> {
