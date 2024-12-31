@@ -6,7 +6,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::{
-    BundleData, CourseData, QuestionData, QuestionOptionData, QuestionSourceData, QuestionTopicData,
+    BundleData, CourseData, IconData, QuestionData, QuestionOptionData, QuestionSourceData,
+    QuestionTopicData,
 };
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
@@ -17,19 +18,20 @@ pub struct SyncData {
     pub question_topics: QuestionTopicsSyncData,
     pub question_sources: QuestionSourcesSyncData,
     pub bundles: BundlesSyncData,
-    pub avatar_file_names: HashSet<String>,
+    pub icons: IconsSyncData,
 }
 
 impl Display for SyncData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f,
-            "Courses: {}\nQuestions: {}\nQuestion options: {}\nQuestion topics: {}\nQuestion sources: {}\nBundles: {}",
+            "Courses: {}\nQuestions: {}\nQuestion options: {}\nQuestion topics: {}\nQuestion sources: {}\nBundles: {}\nIcons: {}",
             self.courses,
             self.questions,
             self.question_options,
             self.question_topics,
             self.question_sources,
-            self.bundles
+            self.bundles,
+            self.icons
         )
     }
 }
@@ -40,6 +42,7 @@ pub type QuestionOptionsSyncData = ElementSyncData<QuestionOptionData, Uuid>;
 pub type QuestionTopicsSyncData = ElementSyncData<QuestionTopicData, String>;
 pub type QuestionSourcesSyncData = ElementSyncData<QuestionSourceData, String>;
 pub type BundlesSyncData = ElementSyncData<BundleData, String>;
+pub type IconsSyncData = ElementSyncData<IconData, String>;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ElementSyncData<T: Eq + Hash, K: Eq + Hash> {
