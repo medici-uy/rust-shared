@@ -78,4 +78,5 @@ pub struct SyncMetadata {
     pub question_topics: HashSet<String>,
     pub question_sources: HashSet<String>,
     pub bundles: HashMap<String, String>,
+    pub icons: HashMap<String, String>,
 }
