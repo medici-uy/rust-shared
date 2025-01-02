@@ -28,6 +28,7 @@ pub fn derive_insertable(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     let table_struct = parse_table_struct(opts.table_struct);
 
     let expanded = quote! {
+        #[::async_trait::async_trait]
         #[automatically_derived]
         impl Insertable<#number_of_fields> for #name {
             type T = #table_struct;
@@ -76,6 +77,7 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     let primary_key_column = opts.primary_key.unwrap_or("id".into());
 
     let expanded = quote! {
+        #[::async_trait::async_trait]
         #[automatically_derived]
         impl Changeset<#number_of_fields> for #name {
             type T = #table_struct;
