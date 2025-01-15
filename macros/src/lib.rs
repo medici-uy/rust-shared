@@ -173,10 +173,6 @@ pub fn derive_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     return false;
                 };
 
-                if !meta_list.path.is_ident(ATTRIBUTE_NAME) {
-                    return false;
-                }
-
                 meta_list.tokens.clone().into_iter().any(|token| {
                     let TokenTree::Ident(ident) = token else {
                         return false;
@@ -189,24 +185,23 @@ pub fn derive_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         .expect("table struct should have a primary key field");
 
     let table_name = opts.table_name;
-    let primary_key_column = stringify!(primary_key_field.ident);
     let primary_key_type = primary_key_field.ty.clone();
+    let primary_key_ident = primary_key_field.ident.clone().unwrap();
 
-    let expanded = quote! {
+    quote! {
         #[automatically_derived]
         impl Table for #name {
             type PrimaryKey = #primary_key_type;
 
             const TABLE_NAME: &'static str = #table_name;
-            const PRIMARY_KEY_COLUMN: &'static str = #primary_key_column;
+            const PRIMARY_KEY_COLUMN: &'static str = stringify!(#primary_key_ident);
 
             fn primary_key(&self) -> &Self::PrimaryKey {
                 &self.#primary_key_field
             }
         }
-    };
-
-    expanded.into()
+    }
+    .into()
 }
 
 #[proc_macro_derive(ValkeyString, attributes(medici))]
@@ -243,8 +238,6 @@ struct HashableOpts {
     pub hash_field: Option<Ident>,
 }
 
-const ATTRIBUTE_NAME: &'static str = "medici";
-
 #[proc_macro_derive(Hashable, attributes(medici))]
 pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -271,10 +264,6 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
                 let Meta::List(meta_list) = &attr.meta else {
                     return false;
                 };
-
-                if !meta_list.path.is_ident(ATTRIBUTE_NAME) {
-                    return false;
-                }
 
                 meta_list.tokens.clone().into_iter().any(|token| {
                     let TokenTree::Ident(ident) = token else {
