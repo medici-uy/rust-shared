@@ -19,32 +19,29 @@ pub fn derive_insertable(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     };
 
     let name = derive_input.ident;
-    let fields = struct_fields_idents(derive_input.data);
-    let fields_to_stringify = fields.iter().map(|field| field.unraw());
-    let number_of_fields = fields.len();
+    let field_idents = struct_field_idents(derive_input.data);
+    let field_idents_to_stringify = field_idents.iter().map(|field| field.unraw());
 
     let table_struct = parse_table_struct(opts.table_struct);
 
-    let expanded = quote! {
+    quote! {
         #[::async_trait::async_trait]
         #[automatically_derived]
-        impl Insertable<#number_of_fields> for #name {
+        impl Insertable for #name {
             type T = #table_struct;
 
             fn columns() -> &'static [&'static str] {
-                [#(stringify!(#fields_to_stringify)),*]
+                [#(stringify!(#field_idents_to_stringify)),*]
             }
 
             fn bind(
                 self,
                 separated: &mut ::sqlx::query_builder::Separated<'_, '_, ::sqlx::Postgres, &'static str>
             ) {
-                #(separated.push_bind(self.#fields);)*
+                #(separated.push_bind(self.#field_idents);)*
             }
         }
-    };
-
-    expanded.into()
+    }.into()
 }
 
 #[derive(FromDeriveInput, Debug)]
@@ -65,7 +62,7 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     };
 
     let name = derive_input.ident;
-    let fields = struct_fields_idents(derive_input.data);
+    let fields = struct_field_idents(derive_input.data);
     let fields_to_stringify = fields.iter().map(|field| field.unraw());
     let number_of_fields = fields.len();
 
@@ -138,7 +135,7 @@ fn filtered_struct_fields<T>(
     }
 }
 
-fn struct_fields_idents(derive_input_data: Data) -> Vec<Ident> {
+fn struct_field_idents(derive_input_data: Data) -> Vec<Ident> {
     filtered_struct_fields(derive_input_data, |field| Some(field.ident.unwrap()))
 }
 
