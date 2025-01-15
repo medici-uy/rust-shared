@@ -21,18 +21,18 @@ pub fn derive_insertable(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     let name = derive_input.ident;
     let field_idents = struct_field_idents(derive_input.data);
     let field_idents_to_stringify = field_idents.iter().map(|field| field.unraw());
+    let number_of_fields = field_idents.len();
 
     let table_struct = parse_table_struct(opts.table_struct);
 
     quote! {
         #[::async_trait::async_trait]
         #[automatically_derived]
-        impl Insertable for #name {
+        impl Insertable<#number_of_fields> for #name {
             type T = #table_struct;
 
-            fn columns() -> &'static [&'static str] {
-                [#(stringify!(#field_idents_to_stringify)),*]
-            }
+            const COLUMNS: [&'static str; #number_of_fields] =
+                [#(stringify!(#field_idents_to_stringify)),*];
 
             fn bind(
                 self,
