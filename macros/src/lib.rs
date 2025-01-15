@@ -197,7 +197,7 @@ pub fn derive_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             const PRIMARY_KEY_COLUMN: &'static str = stringify!(#primary_key_ident);
 
             fn primary_key(&self) -> &Self::PrimaryKey {
-                &self.#primary_key_field
+                &self.#primary_key_ident
             }
         }
     }
