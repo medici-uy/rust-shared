@@ -20,7 +20,7 @@ pub fn derive_insertable(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     };
 
     let name = derive_input.ident;
-    let fields = struct_fields(derive_input.data);
+    let fields = struct_fields_idents(derive_input.data);
     let fields_to_stringify = fields.iter().map(|field| field.unraw());
     let number_of_fields = fields.len();
 
@@ -67,7 +67,7 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     };
 
     let name = derive_input.ident;
-    let fields = struct_fields(derive_input.data);
+    let fields = struct_fields_idents(derive_input.data);
     let fields_to_stringify = fields.iter().map(|field| field.unraw());
     let number_of_fields = fields.len();
 
@@ -123,19 +123,16 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     expanded.into()
 }
 
-fn filtered_struct_fields(derive_input_data: Data, filter: impl Fn(&Field) -> bool) -> Vec<Ident> {
+fn filtered_struct_fields<T>(
+    derive_input_data: Data,
+    filter_map_f: impl Fn(Field) -> Option<T>,
+) -> Vec<T> {
     match derive_input_data {
         Data::Struct(data_struct) => match data_struct.fields {
             Fields::Named(fields_named) => fields_named
                 .named
                 .into_iter()
-                .filter_map(|field| {
-                    if filter(&field) {
-                        Some(field.ident.unwrap())
-                    } else {
-                        None
-                    }
-                })
+                .filter_map(filter_map_f)
                 .collect(),
             _ => panic!("macro supported only on structs with named fields"),
         },
@@ -143,12 +140,73 @@ fn filtered_struct_fields(derive_input_data: Data, filter: impl Fn(&Field) -> bo
     }
 }
 
-fn struct_fields(derive_input_data: Data) -> Vec<Ident> {
-    filtered_struct_fields(derive_input_data, |_| true)
+fn struct_fields_idents(derive_input_data: Data) -> Vec<Ident> {
+    filtered_struct_fields(derive_input_data, |field| Some(field.ident.unwrap()))
 }
 
 fn parse_table_struct(table_struct: String) -> Type {
     syn::parse_str::<syn::Type>(&table_struct).unwrap()
+}
+
+#[derive(FromDeriveInput, Debug)]
+#[darling(attributes(medici))]
+struct TableOpts {
+    pub table_name: String,
+}
+
+#[proc_macro_derive(Table, attributes(medici))]
+pub fn derive_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let derive_input = parse_macro_input!(input as DeriveInput);
+
+    let opts = match TableOpts::from_derive_input(&derive_input) {
+        Ok(opts) => opts,
+        Err(error) => return error.write_errors().into(),
+    };
+
+    let name = derive_input.ident;
+    let fields = filtered_struct_fields(derive_input.data, Some);
+    let primary_key_field = fields
+        .iter()
+        .find(|field| {
+            field.attrs.iter().any(|attr| {
+                let Meta::List(meta_list) = &attr.meta else {
+                    return false;
+                };
+
+                if !meta_list.path.is_ident(ATTRIBUTE_NAME) {
+                    return false;
+                }
+
+                meta_list.tokens.clone().into_iter().any(|token| {
+                    let TokenTree::Ident(ident) = token else {
+                        return false;
+                    };
+
+                    ident == "primary_key"
+                })
+            })
+        })
+        .expect("table struct should have a primary key field");
+
+    let table_name = opts.table_name;
+    let primary_key_column = stringify!(primary_key_field.ident);
+    let primary_key_type = primary_key_field.ty.clone();
+
+    let expanded = quote! {
+        #[automatically_derived]
+        impl Table for #name {
+            type PrimaryKey = #primary_key_type;
+
+            const TABLE_NAME: &'static str = #table_name;
+            const PRIMARY_KEY_COLUMN: &'static str = #primary_key_column;
+
+            fn primary_key(&self) -> &Self::PrimaryKey {
+                &self.#primary_key_field
+            }
+        }
+    };
+
+    expanded.into()
 }
 
 #[proc_macro_derive(ValkeyString, attributes(medici))]
@@ -204,11 +262,11 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
     let name = derive_input.ident;
     let fields = filtered_struct_fields(derive_input.data, |field| {
-        let Some(ident) = &field.ident else {
-            return false;
+        let Some(ident) = field.ident.clone() else {
+            return None;
         };
 
-        ident != &hash_field
+        if ident == hash_field
             && !field.attrs.iter().any(|attr| {
                 let Meta::List(meta_list) = &attr.meta else {
                     return false;
@@ -226,6 +284,11 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
                     ident == "skip_hash"
                 })
             })
+        {
+            return None;
+        }
+
+        Some(ident)
     });
 
     quote! {
