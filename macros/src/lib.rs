@@ -6,7 +6,6 @@ use syn::{ext::IdentExt, parse_macro_input, Data, DeriveInput, Field, Fields, Id
 #[derive(FromDeriveInput, Debug)]
 #[darling(attributes(medici))]
 struct InsertableOpts {
-    pub table_name: String,
     pub table_struct: String,
 }
 
@@ -24,7 +23,6 @@ pub fn derive_insertable(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     let fields_to_stringify = fields.iter().map(|field| field.unraw());
     let number_of_fields = fields.len();
 
-    let table_name = opts.table_name;
     let table_struct = parse_table_struct(opts.table_struct);
 
     let expanded = quote! {
@@ -33,9 +31,9 @@ pub fn derive_insertable(input: proc_macro::TokenStream) -> proc_macro::TokenStr
         impl Insertable<#number_of_fields> for #name {
             type T = #table_struct;
 
-            const COLUMNS: [&'static str; #number_of_fields] =
-                [#(stringify!(#fields_to_stringify)),*];
-            const TABLE_NAME: &'static str = #table_name;
+            fn columns() -> &'static [&'static str] {
+                [#(stringify!(#fields_to_stringify)),*]
+            }
 
             fn bind(
                 self,
