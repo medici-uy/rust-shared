@@ -47,9 +47,7 @@ pub fn derive_insertable(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 #[derive(FromDeriveInput, Debug)]
 #[darling(attributes(medici))]
 struct ChangesetOpts {
-    pub table_name: String,
     pub table_struct: String,
-    pub primary_key: Option<String>,
 }
 
 #[proc_macro_derive(Changeset, attributes(medici))]
@@ -66,12 +64,9 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     let fields_to_stringify = fields.iter().map(|field| field.unraw());
     let number_of_fields = fields.len();
 
-    let table_name = opts.table_name;
     let table_struct = parse_table_struct(opts.table_struct);
 
-    let primary_key_column = opts.primary_key.unwrap_or("id".into());
-
-    let expanded = quote! {
+    quote! {
         #[::async_trait::async_trait]
         #[automatically_derived]
         impl Changeset<#number_of_fields> for #name {
@@ -79,8 +74,6 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
             const COLUMNS: [&'static str; #number_of_fields] =
                 [#(stringify!(#fields_to_stringify)),*];
-            const TABLE_NAME: &'static str = #table_name;
-            const PRIMARY_KEY_COLUMN: &'static str = #primary_key_column;
 
             fn bind(
                 self,
@@ -113,9 +106,7 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
                 other == self
             }
         }
-    };
-
-    expanded.into()
+    }.into()
 }
 
 fn filtered_struct_fields<T>(
