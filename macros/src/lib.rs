@@ -218,26 +218,13 @@ pub fn derive_valkey_string(input: proc_macro::TokenStream) -> proc_macro::Token
     expanded.into()
 }
 
-#[derive(FromDeriveInput, Debug)]
-#[darling(attributes(medici))]
-struct HashableOpts {
-    pub hash_field: Option<Ident>,
-}
-
 #[proc_macro_derive(Hashable, attributes(medici))]
 pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
 
     let (impl_generics, ty_generics, where_clause) = derive_input.generics.split_for_impl();
 
-    let opts = match HashableOpts::from_derive_input(&derive_input) {
-        Ok(opts) => opts,
-        Err(error) => return error.write_errors().into(),
-    };
-
-    let hash_field = opts
-        .hash_field
-        .unwrap_or(syn::parse_str::<Ident>("hash").unwrap());
+    let hash_field_ident = syn::parse_str::<Ident>("hash").unwrap();
 
     let name = derive_input.ident;
     let fields = filtered_struct_fields(derive_input.data, |field| {
@@ -245,8 +232,8 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
             return None;
         };
 
-        if ident == hash_field
-            && !field.attrs.iter().any(|attr| {
+        if ident == hash_field_ident
+            || field.attrs.iter().any(|attr| {
                 let Meta::List(meta_list) = &attr.meta else {
                     return false;
                 };
@@ -275,7 +262,7 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
                 #(
                     ::std::iter::Extend::extend(
                         &mut bytes,
-                        ::core::primitive::str::as_bytes(stringify!(self.#fields))
+                        ::core::primitive::str::as_bytes(stringify!(#fields))
                     );
                     ::std::iter::Extend::extend(
                         &mut bytes,
@@ -286,16 +273,16 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
                 bytes
             }
 
-            fn get_hash(&self) -> ::core::option::Option<&::std::primitive::str> {
-                if ::std::string::String::is_empty(&self.#hash_field) {
+            fn stored_hash(&self) -> ::core::option::Option<&::std::primitive::str> {
+                if ::std::string::String::is_empty(&self.#hash_field_ident) {
                     ::core::option::Option::None
                 } else {
-                    ::core::option::Option::Some(&self.#hash_field)
+                    ::core::option::Option::Some(&self.#hash_field_ident)
                 }
             }
 
             fn set_hash(&mut self, hash: ::std::string::String) {
-                self.#hash_field = hash;
+                self.#hash_field_ident = hash;
             }
         }
     }

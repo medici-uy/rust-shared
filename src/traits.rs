@@ -8,12 +8,8 @@ use uuid::Uuid;
 pub trait Hashable {
     fn to_bytes(&self) -> Vec<u8>;
 
-    fn hash(&self) -> String {
-        if let Some(hash) = self.get_hash() {
-            return hash.into();
-        }
-
-        self.compute_hash()
+    fn stored_hash(&self) -> Option<&str> {
+        panic!("this type does not store hash");
     }
 
     fn compute_hash(&self) -> String {
@@ -26,10 +22,6 @@ pub trait Hashable {
 
     fn set_hash(&mut self, _hash: String) {
         panic!("cannot store hash in this type");
-    }
-
-    fn get_hash(&self) -> Option<&str> {
-        None
     }
 }
 
@@ -77,7 +69,7 @@ impl Hashable for u16 {
 
 impl Hashable for bool {
     fn to_bytes(&self) -> Vec<u8> {
-        self.to_string().to_bytes()
+        vec![*self as u8]
     }
 }
 
