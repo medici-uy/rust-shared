@@ -5,12 +5,12 @@ members = [".", "macros"]
 name = "medici-shared"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.83"
+rust-version = "1.84"
 
 [dependencies]
 anyhow = "1.0.95"
-async-openai = "0.26.0"
-aws-sdk-sesv2 = "1.58.0"
+async-openai = "0.27.2"
+aws-sdk-sesv2 = "1.65.0"
 blake3 = "1.5.5"
 chrono = { version = "0.4.39", default-features = false, features = [
     "std",
@@ -20,25 +20,25 @@ chrono = { version = "0.4.39", default-features = false, features = [
 medici-macros = { path = "macros" }
 regex = "1.11.1"
 rust_decimal = "1.36.0"
-serde = { version = "1.0.216", features = ["derive"] }
-serde_json = "1.0.134"
-sqlx = { version = "0.8.2", default-features = false, features = [
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.138"
+sqlx = { version = "0.8.3", default-features = false, features = [
     "runtime-tokio",
     "postgres",
     "macros",
     "derive",
 ] }
-strum = { version = "0.26.3", features = ["derive"] }
-tokio = { version = "1.42.0", features = ["full"] }
+strum = { version = "0.27.0", features = ["derive"] }
+tokio = { version = "1.43.0", features = ["full"] }
 tracing = "0.1.41"
-uuid = { version = "1.11.0", features = ["std", "v4", "serde"] }
+uuid = { version = "1.13.1", features = ["std", "v4", "serde"] }
 
 [dev-dependencies]
-fake = { version = "3.0.1", features = [
+fake = { version = "3.1.0", features = [
     "derive",
     "rust_decimal",
     "uuid",
     "chrono",
 ] }
 proptest = "1.6.0"
-rand = "0.8.5"
+rand = "0.9.0"
