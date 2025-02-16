@@ -127,7 +127,27 @@ fn filtered_struct_fields<T>(
 }
 
 fn struct_field_idents(derive_input_data: Data) -> Vec<Ident> {
-    filtered_struct_fields(derive_input_data, |field| Some(field.ident.unwrap()))
+    filtered_struct_fields(derive_input_data, |field| {
+        let ident = field.ident.unwrap();
+
+        if field.attrs.iter().any(|attr| {
+            let Meta::List(meta_list) = &attr.meta else {
+                return false;
+            };
+
+            meta_list.tokens.clone().into_iter().any(|token| {
+                let TokenTree::Ident(ident) = token else {
+                    return false;
+                };
+
+                ident == "skip"
+            })
+        }) {
+            return None;
+        }
+
+        Some(ident)
+    })
 }
 
 fn parse_table_struct(table_struct: String) -> Type {
@@ -228,9 +248,7 @@ pub fn derive_hashable(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
     let name = derive_input.ident;
     let fields = filtered_struct_fields(derive_input.data, |field| {
-        let Some(ident) = field.ident.clone() else {
-            return None;
-        };
+        let ident = field.ident.unwrap();
 
         if ident == hash_field_ident
             || field.attrs.iter().any(|attr| {
