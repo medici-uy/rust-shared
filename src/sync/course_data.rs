@@ -24,7 +24,7 @@ pub struct CourseData {
     pub short_name: String,
     pub description: Option<String>,
     #[cfg_attr(test, dummy(default))]
-    pub price_in_uyu: Option<Decimal>,
+    pub price_in_uyu: Decimal,
     pub tags: Vec<String>,
     pub image_file_name: PathBuf,
     pub year: Option<u16>,
@@ -43,7 +43,7 @@ impl CourseData {
         name: String,
         short_name: String,
         description: Option<String>,
-        price_in_uyu: Option<Decimal>,
+        price_in_uyu: Decimal,
         tags: Vec<String>,
         image_file_name: PathBuf,
         year: Option<u16>,
@@ -122,10 +122,8 @@ impl CourseData {
             bail!("invalid course with key {}", self.key);
         }
 
-        if let Some(price_in_uyu) = self.price_in_uyu {
-            if price_in_uyu <= Decimal::ZERO {
-                bail!("invalid course price");
-            }
+        if self.price_in_uyu < Decimal::ZERO {
+            bail!("invalid course price");
         }
 
         Ok(())
