@@ -3,13 +3,13 @@ name = "medici-macros"
 version = "0.0.1"
 authors = ["Diego Stratta <diego@medici.uy>"]
 edition = "2021"
-rust-version = "1.84"
+rust-version = "1.87"
 
 [lib]
 proc-macro = true
 
 [dependencies]
-darling = "0.20.10"
-quote = { version = "1.0.38" }
-proc-macro2 = "1.0.93"
-syn = { version = "2.0.98", features = ["full"] }
+darling = "0.20.11"
+quote = { version = "1.0.40" }
+proc-macro2 = "1.0.95"
+syn = { version = "2.0.101", features = ["full"] }
