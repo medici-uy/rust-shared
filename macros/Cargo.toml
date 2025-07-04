@@ -2,8 +2,8 @@
 name = "medici-macros"
 version = "0.0.1"
 authors = ["Diego Stratta <diego@medici.uy>"]
-edition = "2021"
-rust-version = "1.87"
+edition = "2024"
+rust-version = "1.88"
 
 [lib]
 proc-macro = true
@@ -12,4 +12,4 @@ proc-macro = true
 darling = "0.20.11"
 quote = { version = "1.0.40" }
 proc-macro2 = "1.0.95"
-syn = { version = "2.0.101", features = ["full"] }
+syn = { version = "2.0.104", features = ["full"] }

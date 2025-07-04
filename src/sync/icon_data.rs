@@ -1,11 +1,11 @@
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use rust_decimal::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 use super::{
-    helpers::{format_text, full_image_path},
     ICON_IMAGES_DIR_NAME,
+    helpers::{format_text, full_image_path},
 };
 use crate::traits::Hashable;
 
@@ -54,10 +54,10 @@ impl IconData {
     }
 
     fn check(&self) -> Result<()> {
-        if let Some(price_in_uyu) = self.price_in_uyu {
-            if price_in_uyu <= Decimal::ZERO {
-                bail!("invalid icon price");
-            }
+        if let Some(price_in_uyu) = self.price_in_uyu
+            && price_in_uyu <= Decimal::ZERO
+        {
+            bail!("invalid icon price");
         }
 
         Ok(())

@@ -1,7 +1,7 @@
 use darling::FromDeriveInput;
 use proc_macro2::TokenTree;
 use quote::quote;
-use syn::{ext::IdentExt, parse_macro_input, Data, DeriveInput, Field, Fields, Ident, Meta, Type};
+use syn::{Data, DeriveInput, Field, Fields, Ident, Meta, Type, ext::IdentExt, parse_macro_input};
 
 #[derive(FromDeriveInput, Debug)]
 #[darling(attributes(medici))]
@@ -90,10 +90,8 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
         #[automatically_derived]
         impl ::std::cmp::PartialEq<#table_struct> for #name {
             fn eq(&self, other: &#table_struct) -> bool {
-                #(if let ::std::option::Option::Some(ref value) = self.#fields {
-                    if value != &other.#fields {
-                        return false;
-                    }
+                #(if let ::std::option::Option::Some(ref value) = self.#fields && value != &other.#fields {
+                    return false;
                 })*
 
                 true

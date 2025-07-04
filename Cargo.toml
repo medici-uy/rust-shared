@@ -4,13 +4,13 @@ members = [".", "macros"]
 [package]
 name = "medici-shared"
 version = "0.1.0"
-edition = "2021"
-rust-version = "1.87"
+edition = "2024"
+rust-version = "1.88"
 
 [dependencies]
 anyhow = "1.0.98"
-async-openai = "0.28.1"
-aws-sdk-sesv2 = "1.80.0"
+async-openai = "0.29.0"
+aws-sdk-sesv2 = "1.85.0"
 blake3 = "1.8.2"
 chrono = { version = "0.4.41", default-features = false, features = [
     "std",
@@ -19,7 +19,7 @@ chrono = { version = "0.4.41", default-features = false, features = [
 ] }
 medici-macros = { path = "macros" }
 regex = "1.11.1"
-rust_decimal = "1.37.1"
+rust_decimal = "1.37.2"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 sqlx = { version = "0.8.6", default-features = false, features = [
@@ -29,7 +29,7 @@ sqlx = { version = "0.8.6", default-features = false, features = [
     "derive",
 ] }
 strum = { version = "0.27.1", features = ["derive"] }
-tokio = { version = "1.45.1", features = ["full"] }
+tokio = { version = "1.46.1", features = ["full"] }
 tracing = "0.1.41"
 uuid = { version = "1.17.0", features = ["std", "v4", "serde"] }
 
@@ -40,5 +40,5 @@ fake = { version = "4.3.0", features = [
     "uuid",
     "chrono",
 ] }
-proptest = "1.6.0"
+proptest = "1.7.0"
 rand = "0.9.1"
