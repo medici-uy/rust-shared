@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 pub async fn send_chat_completion(
-    request: async_openai::types::CreateChatCompletionRequest,
+    request: async_openai::types::chat::CreateChatCompletionRequest,
     client: &async_openai::Client<async_openai::config::OpenAIConfig>,
 ) -> Result<String> {
     let response = client
