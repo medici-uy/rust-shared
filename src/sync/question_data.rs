@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use chrono::Utc;
 #[cfg(test)]
 use fake::{Dummy, Fake, Faker};
@@ -218,6 +218,10 @@ impl QuestionData {
         }
 
         self.process()
+    }
+
+    pub fn has_image(&self) -> bool {
+        self.image_file_name.is_some()
     }
 
     pub fn full_image_path(&self) -> Option<String> {
