@@ -36,12 +36,13 @@ pub fn derive_insertable(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
             fn bind(
                 self,
-                separated: &mut ::sqlx::query_builder::Separated<'_, '_, ::sqlx::Postgres, &'static str>
+                separated: &mut ::sqlx::query_builder::Separated<'_, ::sqlx::Postgres, &'static str>
             ) {
                 #(separated.push_bind(self.#field_idents);)*
             }
         }
-    }.into()
+    }
+    .into()
 }
 
 #[derive(FromDeriveInput, Debug)]
@@ -73,7 +74,7 @@ pub fn derive_changeset(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
             fn bind(
                 self,
-                separated: &mut ::sqlx::query_builder::Separated<'_, '_, ::sqlx::Postgres, &'static str>
+                separated: &mut ::sqlx::query_builder::Separated<'_, ::sqlx::Postgres, &'static str>
             ) {
                 #(if let ::std::option::Option::Some(value) = self.#fields {
                     separated.push(format!("\"{}\" = ", stringify!(#fields)));
