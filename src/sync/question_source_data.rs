@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use chrono::NaiveDate;
 #[cfg(test)]
 use fake::{Dummy, Fake, Faker};
@@ -106,6 +106,7 @@ impl Hashable for QuestionSourceData {
     Debug,
 )]
 #[cfg_attr(test, derive(Dummy))]
+#[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 #[sqlx(type_name = "text", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
