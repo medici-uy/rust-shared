@@ -93,21 +93,12 @@ impl Hashable for QuestionSourceData {
 }
 
 #[derive(
-    sqlx::Type,
-    strum::Display,
-    Serialize,
-    Deserialize,
-    PartialEq,
-    Hash,
-    Eq,
-    PartialOrd,
-    Ord,
-    Clone,
-    Debug,
+    strum::Display, Serialize, Deserialize, PartialEq, Hash, Eq, PartialOrd, Ord, Clone, Debug,
 )]
 #[cfg_attr(test, derive(Dummy))]
 #[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
-#[sqlx(type_name = "text", rename_all = "snake_case")]
+#[cfg_attr(feature = "sqlx", derive(sqlx::Type))]
+#[cfg_attr(feature = "sqlx", sqlx(type_name = "text", rename_all = "snake_case"))]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum QuestionSourceType {
