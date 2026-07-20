@@ -9,7 +9,7 @@ rust-version = "1.97"
 
 [dependencies]
 anyhow = "1.0.103"
-aws-sdk-sesv2 = "1.124.0"
+aws-sdk-sesv2 = { version = "1.124.0", optional = true }
 blake3 = "1.8.5"
 chrono = { version = "0.4.45", default-features = false, features = [
     "std",
@@ -46,3 +46,4 @@ rand = "0.10.2"
 [features]
 clap = ["dep:clap"]
 sqlx = ["dep:sqlx"]
+email = ["dep:aws-sdk-sesv2"]

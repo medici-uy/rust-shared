@@ -2,7 +2,6 @@ use std::path::PathBuf;
 
 use chrono::{DateTime, Utc};
 use rust_decimal::prelude::*;
-use serde::Serialize;
 use uuid::Uuid;
 
 pub trait Hashable {
@@ -79,7 +78,8 @@ impl Hashable for PathBuf {
     }
 }
 
-pub trait EmailTemplate: Serialize + Sized {
+#[cfg(feature = "email")]
+pub trait EmailTemplate: serde::Serialize + Sized {
     const TEMPLATE_NAME: &'static str;
 
     fn data(&self) -> String {
